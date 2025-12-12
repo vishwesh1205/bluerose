@@ -1,8 +1,10 @@
-import { Play, Pause, SkipBack, SkipForward, Heart, Volume2, VolumeX, Repeat, Shuffle } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Heart, Volume2, VolumeX, Repeat, Repeat1, Shuffle, ListMusic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { usePlayer } from "@/contexts/PlayerContext";
+import { useLikedTracks } from "@/hooks/useLikedTracks";
+import { useAuth } from "@/hooks/useAuth";
 
 const formatTime = (seconds: number): string => {
   if (!seconds || isNaN(seconds)) return "0:00";
@@ -21,9 +23,19 @@ const MusicPlayer = () => {
     togglePlay,
     seek,
     setVolume,
+    shuffle,
+    repeat,
+    toggleShuffle,
+    toggleRepeat,
+    playNext,
+    playPrevious,
   } = usePlayer();
+  
+  const { isLiked, toggleLike } = useLikedTracks();
+  const { isAuthenticated } = useAuth();
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const currentTrackId = currentTrack ? `yt:${currentTrack.videoId}` : null;
 
   const handleProgressChange = (value: number[]) => {
     const newTime = (value[0] / 100) * duration;
@@ -32,6 +44,12 @@ const MusicPlayer = () => {
 
   const handleVolumeChange = (value: number[]) => {
     setVolume(value[0]);
+  };
+
+  const handleLike = () => {
+    if (currentTrackId) {
+      toggleLike(currentTrackId);
+    }
   };
 
   return (
@@ -89,17 +107,29 @@ const MusicPlayer = () => {
                 </div>
               </>
             )}
-            <Button size="icon" variant="ghost" className="text-primary hover:text-primary/80 flex-shrink-0">
-              <Heart className="w-5 h-5" />
-            </Button>
+            {isAuthenticated && currentTrack && (
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className={`flex-shrink-0 ${currentTrackId && isLiked(currentTrackId) ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+                onClick={handleLike}
+              >
+                <Heart className={`w-5 h-5 ${currentTrackId && isLiked(currentTrackId) ? "fill-current" : ""}`} />
+              </Button>
+            )}
           </div>
 
           {/* Controls */}
           <div className="flex items-center gap-2">
-            <Button size="icon" variant="ghost">
+            <Button 
+              size="icon" 
+              variant="ghost"
+              className={shuffle ? "text-primary" : "text-muted-foreground"}
+              onClick={toggleShuffle}
+            >
               <Shuffle className="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="ghost">
+            <Button size="icon" variant="ghost" onClick={playPrevious}>
               <SkipBack className="w-5 h-5" />
             </Button>
             <Button 
@@ -113,16 +143,28 @@ const MusicPlayer = () => {
                 <Play className="w-6 h-6 ml-0.5" />
               )}
             </Button>
-            <Button size="icon" variant="ghost">
+            <Button size="icon" variant="ghost" onClick={playNext}>
               <SkipForward className="w-5 h-5" />
             </Button>
-            <Button size="icon" variant="ghost">
-              <Repeat className="w-4 h-4" />
+            <Button 
+              size="icon" 
+              variant="ghost"
+              className={repeat !== "off" ? "text-primary" : "text-muted-foreground"}
+              onClick={toggleRepeat}
+            >
+              {repeat === "one" ? (
+                <Repeat1 className="w-4 h-4" />
+              ) : (
+                <Repeat className="w-4 h-4" />
+              )}
             </Button>
           </div>
 
-          {/* Volume */}
+          {/* Volume & Queue */}
           <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
+            <Button size="icon" variant="ghost" className="text-muted-foreground">
+              <ListMusic className="w-5 h-5" />
+            </Button>
             <Button 
               size="icon" 
               variant="ghost"

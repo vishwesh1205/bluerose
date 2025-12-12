@@ -1,46 +1,68 @@
-import { useState } from "react";
-import { Search, Play, Music2 } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { Search, Play, Music2, Loader2, Plus, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { usePlayer } from "@/contexts/PlayerContext";
+import { useYouTubeSearch, SearchTrack } from "@/hooks/useYouTubeSearch";
+import { useLikedTracks } from "@/hooks/useLikedTracks";
+import { useAuth } from "@/hooks/useAuth";
+
+const formatDuration = (seconds: number): string => {
+  if (!seconds) return "";
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
 
 // Demo tracks with real YouTube video IDs (royalty-free music)
-const demoTracks = [
+const demoTracks: SearchTrack[] = [
   {
-    id: "1",
+    id: "yt:jfKfPfyJRdk",
     videoId: "jfKfPfyJRdk",
     title: "Lofi Hip Hop Radio",
-    artist: "Lofi Girl",
+    artists: ["Lofi Girl"],
     thumbnail: "https://img.youtube.com/vi/jfKfPfyJRdk/mqdefault.jpg",
+    duration: 0,
+    source: "youtube",
   },
   {
-    id: "2",
+    id: "yt:5qap5aO4i9A",
     videoId: "5qap5aO4i9A",
     title: "Lofi Hip Hop Mix",
-    artist: "Chillhop Music",
+    artists: ["Chillhop Music"],
     thumbnail: "https://img.youtube.com/vi/5qap5aO4i9A/mqdefault.jpg",
+    duration: 0,
+    source: "youtube",
   },
   {
-    id: "3",
+    id: "yt:lTRiuFIWV54",
     videoId: "lTRiuFIWV54",
     title: "Relaxing Jazz Piano",
-    artist: "Cafe Music BGM",
+    artists: ["Cafe Music BGM"],
     thumbnail: "https://img.youtube.com/vi/lTRiuFIWV54/mqdefault.jpg",
+    duration: 0,
+    source: "youtube",
   },
   {
-    id: "4",
+    id: "yt:DWcJFNfaw9c",
     videoId: "DWcJFNfaw9c",
     title: "Study With Me",
-    artist: "The Sherry Formula",
+    artists: ["The Sherry Formula"],
     thumbnail: "https://img.youtube.com/vi/DWcJFNfaw9c/mqdefault.jpg",
+    duration: 0,
+    source: "youtube",
   },
 ];
 
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
-  const { loadVideoById, loadTrack, isReady } = usePlayer();
+  const [hasSearched, setHasSearched] = useState(false);
+  const { loadVideoById, isReady } = usePlayer();
+  const { results, loading, search, clearResults } = useYouTubeSearch();
+  const { isLiked, toggleLike } = useLikedTracks();
+  const { isAuthenticated } = useAuth();
 
   const extractVideoId = (url: string): string | null => {
     const patterns = [
@@ -63,18 +85,26 @@ const SearchSection = () => {
     }
   };
 
-  const filteredTracks = demoTracks.filter(
-    (track) =>
-      track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      track.artist.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSearch = useCallback(async () => {
+    if (searchQuery.trim()) {
+      setHasSearched(true);
+      await search(searchQuery);
+    }
+  }, [searchQuery, search]);
+
+  const handlePlayTrack = (track: SearchTrack) => {
+    loadVideoById(track.videoId, track.title, track.artists[0] || "Unknown Artist");
+  };
+
+  // Show demo tracks when not searching
+  const displayTracks = hasSearched && results.length > 0 ? results : (!hasSearched ? demoTracks : []);
 
   return (
     <section className="py-16 px-4">
       <div className="container mx-auto max-w-4xl">
         <h2 className="text-3xl font-bold text-center mb-8">
           <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Play Any YouTube Video
+            Search & Play Music
           </span>
         </h2>
 
@@ -101,35 +131,67 @@ const SearchSection = () => {
               Play
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Example: https://youtube.com/watch?v=dQw4w9WgXcQ or just the video ID
-          </p>
         </Card>
 
-        {/* Search Demo Tracks */}
-        <div className="mb-6">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search demo tracks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-background/50 border-border/50"
-            />
+        {/* Search Input */}
+        <div className="mb-8">
+          <div className="flex gap-2 max-w-2xl mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search for songs, artists..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-background/50 border-border/50"
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
+            </div>
+            <Button 
+              onClick={handleSearch} 
+              disabled={loading || !searchQuery.trim()}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Search"
+              )}
+            </Button>
           </div>
+          {hasSearched && (
+            <div className="text-center mt-2">
+              <button 
+                onClick={() => { clearResults(); setHasSearched(false); setSearchQuery(""); }}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                Clear search results
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Demo Tracks Grid */}
+        {/* Section Title */}
+        <h3 className="text-xl font-semibold mb-4 text-center">
+          {hasSearched && results.length > 0 
+            ? `Found ${results.length} results`
+            : hasSearched && results.length === 0 
+            ? "No results found"
+            : "Quick Play"}
+        </h3>
+
+        {/* Track Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filteredTracks.map((track) => (
+          {displayTracks.map((track) => (
             <Card
               key={track.id}
-              className="group p-4 bg-card/50 backdrop-blur-sm border-border/50 hover:bg-card/70 transition-all duration-300 cursor-pointer"
-              onClick={() => loadTrack({ ...track, duration: 0 })}
+              className="group p-4 bg-card/50 backdrop-blur-sm border-border/50 hover:bg-card/70 transition-all duration-300"
             >
               <div className="flex items-center gap-4">
-                <div className="relative">
+                <div 
+                  className="relative cursor-pointer"
+                  onClick={() => handlePlayTrack(track)}
+                >
                   <img
                     src={track.thumbnail}
                     alt={track.title}
@@ -140,8 +202,40 @@ const SearchSection = () => {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{track.title}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
+                  <h3 
+                    className="font-semibold truncate cursor-pointer hover:text-primary"
+                    onClick={() => handlePlayTrack(track)}
+                  >
+                    {track.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {track.artists.join(", ")}
+                  </p>
+                  {track.duration > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {formatDuration(track.duration)}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  {isAuthenticated && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className={isLiked(track.id) ? "text-primary" : "text-muted-foreground"}
+                      onClick={() => toggleLike(track.id)}
+                    >
+                      <Heart className={`w-4 h-4 ${isLiked(track.id) ? "fill-current" : ""}`} />
+                    </Button>
+                  )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => handlePlayTrack(track)}
+                  >
+                    <Play className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </Card>
