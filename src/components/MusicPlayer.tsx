@@ -1,10 +1,11 @@
-import { Play, Pause, SkipBack, SkipForward, Heart, Volume2, VolumeX, Repeat, Repeat1, Shuffle, ListMusic } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Heart, Volume2, VolumeX, Repeat, Repeat1, Shuffle, ListMusic, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
 import { useAuth } from "@/hooks/useAuth";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const formatTime = (seconds: number): string => {
   if (!seconds || isNaN(seconds)) return "0:00";
@@ -25,8 +26,10 @@ const MusicPlayer = () => {
     setVolume,
     shuffle,
     repeat,
+    autoplay,
     toggleShuffle,
     toggleRepeat,
+    toggleAutoplay,
     playNext,
     playPrevious,
   } = usePlayer();
@@ -160,8 +163,25 @@ const MusicPlayer = () => {
             </Button>
           </div>
 
-          {/* Volume & Queue */}
+          {/* Volume, Autoplay & Queue */}
           <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    className={autoplay ? "text-primary" : "text-muted-foreground"}
+                    onClick={toggleAutoplay}
+                  >
+                    <Sparkles className="w-5 h-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>AI Autoplay {autoplay ? "On" : "Off"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button size="icon" variant="ghost" className="text-muted-foreground">
               <ListMusic className="w-5 h-5" />
             </Button>
