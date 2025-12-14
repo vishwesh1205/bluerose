@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.autoplay-recommend]
 verify_jwt = false
+
+[functions.top-charts]
+verify_jwt = false
