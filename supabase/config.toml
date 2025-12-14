@@ -1,4 +1,7 @@
 project_id = "hcsnyrbkrydmopnojufj"
 
+[functions.ai-music-chat]
+verify_jwt = false
+
 [functions.youtube-search]
 verify_jwt = false
