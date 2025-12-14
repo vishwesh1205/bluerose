@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.youtube-search]
 verify_jwt = false
+
+[functions.autoplay-recommend]
+verify_jwt = false
