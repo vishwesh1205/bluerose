@@ -15,7 +15,6 @@ const formatDuration = (seconds: number): string => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-// Demo tracks with real YouTube video IDs (royalty-free music)
 const demoTracks: SearchTrack[] = [
   {
     id: "yt:jfKfPfyJRdk",
@@ -96,36 +95,36 @@ const SearchSection = () => {
     loadVideoById(track.videoId, track.title, track.artists[0] || "Unknown Artist");
   };
 
-  // Show demo tracks when not searching
   const displayTracks = hasSearched && results.length > 0 ? results : (!hasSearched ? demoTracks : []);
 
   return (
-    <section className="py-16 px-4">
+    <section className="py-16 px-4 relative">
+      {/* Section divider line */}
+      <div className="absolute top-0 left-0 right-0 h-px tron-line" />
+      
       <div className="container mx-auto max-w-4xl">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Search & Play Music
-          </span>
+        <h2 className="text-3xl font-bold text-center mb-8 font-display tracking-wide">
+          <span className="text-primary glow-text">SEARCH</span> & PLAY
         </h2>
 
         {/* YouTube URL Input */}
-        <Card className="p-6 mb-8 bg-card/50 backdrop-blur-sm border-border/50">
+        <Card className="p-6 mb-8 bg-card/50 backdrop-blur-sm border-primary/20">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Music2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Music2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/50" />
               <Input
                 type="text"
                 placeholder="Paste YouTube URL or Video ID..."
                 value={youtubeUrl}
                 onChange={(e) => setYoutubeUrl(e.target.value)}
-                className="pl-10 bg-background/50 border-border/50"
+                className="pl-10 bg-background/50 border-primary/20 focus:border-primary text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === "Enter" && handlePlayUrl()}
               />
             </div>
             <Button 
               onClick={handlePlayUrl} 
               disabled={!isReady || !youtubeUrl}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground tracking-wider uppercase glow-primary"
             >
               <Play className="w-4 h-4 mr-2" />
               Play
@@ -137,20 +136,20 @@ const SearchSection = () => {
         <div className="mb-8">
           <div className="flex gap-2 max-w-2xl mx-auto">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/50" />
               <Input
                 type="text"
                 placeholder="Search for songs, artists..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background/50 border-border/50"
+                className="pl-10 bg-background/50 border-primary/20 focus:border-primary text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
             <Button 
               onClick={handleSearch} 
               disabled={loading || !searchQuery.trim()}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground tracking-wider uppercase"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -163,7 +162,7 @@ const SearchSection = () => {
             <div className="text-center mt-2">
               <button 
                 onClick={() => { clearResults(); setHasSearched(false); setSearchQuery(""); }}
-                className="text-sm text-muted-foreground hover:text-foreground"
+                className="text-sm text-primary/70 hover:text-primary transition-colors"
               >
                 Clear search results
               </button>
@@ -172,12 +171,12 @@ const SearchSection = () => {
         </div>
 
         {/* Section Title */}
-        <h3 className="text-xl font-semibold mb-4 text-center">
+        <h3 className="text-xl font-semibold mb-4 text-center tracking-wide">
           {hasSearched && results.length > 0 
             ? `Found ${results.length} results`
             : hasSearched && results.length === 0 
             ? "No results found"
-            : "Quick Play"}
+            : "QUICK PLAY"}
         </h3>
 
         {/* Track Grid */}
@@ -185,7 +184,7 @@ const SearchSection = () => {
           {displayTracks.map((track) => (
             <Card
               key={track.id}
-              className="group p-4 bg-card/50 backdrop-blur-sm border-border/50 hover:bg-card/70 transition-all duration-300"
+              className="group p-4 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_15px_hsl(185_100%_50%/0.15)]"
             >
               <div className="flex items-center gap-4">
                 <div 
@@ -195,15 +194,15 @@ const SearchSection = () => {
                   <img
                     src={track.thumbnail}
                     alt={track.title}
-                    className="w-16 h-16 rounded-lg object-cover"
+                    className="w-16 h-16 rounded object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                    <Play className="w-6 h-6 text-white" />
+                  <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                    <Play className="w-6 h-6 text-primary" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 
-                    className="font-semibold truncate cursor-pointer hover:text-primary"
+                    className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
                     onClick={() => handlePlayTrack(track)}
                   >
                     {track.title}
@@ -222,7 +221,7 @@ const SearchSection = () => {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className={isLiked(track.id) ? "text-primary" : "text-muted-foreground"}
+                      className={isLiked(track.id) ? "text-primary" : "text-muted-foreground hover:text-primary"}
                       onClick={() => toggleLike(track.id)}
                     >
                       <Heart className={`w-4 h-4 ${isLiked(track.id) ? "fill-current" : ""}`} />
@@ -231,7 +230,7 @@ const SearchSection = () => {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-primary"
                     onClick={() => handlePlayTrack(track)}
                   >
                     <Play className="w-4 h-4" />

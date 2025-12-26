@@ -74,7 +74,6 @@ export const TopCharts = () => {
     setPlayingRank(song.rank);
     
     try {
-      // Search for the song on YouTube
       const searchQuery = `${song.title} ${song.artists[0]} ${song.movie !== "Single" ? song.movie : ""} ${song.language}`;
       
       const response = await fetch(
@@ -101,133 +100,143 @@ export const TopCharts = () => {
   }, [loadTrack]);
 
   const getRankStyle = (rank: number) => {
-    if (rank === 1) return "bg-gradient-to-r from-yellow-500 to-amber-400 text-black font-bold";
-    if (rank === 2) return "bg-gradient-to-r from-gray-300 to-gray-400 text-black font-bold";
-    if (rank === 3) return "bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold";
-    if (rank <= 10) return "bg-primary/20 text-primary font-semibold";
-    return "bg-muted text-muted-foreground";
+    if (rank === 1) return "bg-primary text-primary-foreground font-bold glow-primary";
+    if (rank === 2) return "bg-primary/70 text-primary-foreground font-bold";
+    if (rank === 3) return "bg-primary/50 text-primary-foreground font-bold";
+    if (rank <= 10) return "bg-primary/20 text-primary font-semibold border border-primary/30";
+    return "bg-muted text-muted-foreground border border-border";
   };
 
   return (
-    <section className="py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <TrendingUp className="h-6 w-6 text-primary" />
-        <h2 className="text-2xl font-bold">Top 50 Charts</h2>
-        <Badge variant="secondary" className="ml-2">AI Curated</Badge>
-      </div>
+    <section className="py-8 px-4 relative">
+      {/* Section divider line */}
+      <div className="absolute top-0 left-0 right-0 h-px tron-line" />
+      
+      <div className="container mx-auto">
+        <div className="flex items-center gap-3 mb-6">
+          <TrendingUp className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-bold font-display tracking-wide">TOP 50 CHARTS</h2>
+          <Badge variant="outline" className="ml-2 border-primary/50 text-primary">AI Curated</Badge>
+        </div>
 
-      <p className="text-muted-foreground mb-6">
-        The songs everyone's playing right now — updated to match your world.
-      </p>
+        <p className="text-muted-foreground mb-6 tracking-wide">
+          The songs everyone's playing right now — updated to match your world.
+        </p>
 
-      {/* Industry Selection */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {industries.map((ind) => (
-          <Button
-            key={ind.id}
-            variant={selectedIndustry === ind.id ? "default" : "outline"}
-            size="sm"
-            onClick={() => fetchChart(ind.id)}
-            disabled={loading}
-            className="gap-2"
-          >
-            <span>{ind.flag}</span>
-            {ind.name}
-          </Button>
-        ))}
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">
-              Generating Top 50 {selectedIndustry} chart...
-            </p>
-            <p className="text-sm text-muted-foreground/70 mt-2">
-              Curating the hottest tracks just for you
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Chart Display */}
-      {chartData && !loading && (
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5 text-primary" />
-                Top 50 {chartData.industry.charAt(0).toUpperCase() + chartData.industry.slice(1)}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {chartData.language} • Updated {new Date(chartData.generatedAt).toLocaleDateString()}
-              </p>
-            </div>
+        {/* Industry Selection */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {industries.map((ind) => (
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => fetchChart(chartData.industry)}
+              key={ind.id}
+              variant={selectedIndustry === ind.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => fetchChart(ind.id)}
               disabled={loading}
+              className={`gap-2 tracking-wide ${
+                selectedIndustry === ind.id 
+                  ? "bg-primary text-primary-foreground glow-primary" 
+                  : "border-primary/30 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/10"
+              }`}
             >
-              <RefreshCw className="h-4 w-4" />
+              <span>{ind.flag}</span>
+              {ind.name}
             </Button>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[500px] pr-4">
-              <div className="space-y-2">
-                {chartData.chart.map((song) => (
-                  <div
-                    key={song.rank}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors group"
-                  >
-                    {/* Rank Badge */}
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${getRankStyle(song.rank)}`}>
-                      {song.rank}
-                    </div>
+          ))}
+        </div>
 
-                    {/* Song Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{song.title}</p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {song.artists.join(", ")} • {song.movie}
-                      </p>
-                    </div>
+        {/* Loading State */}
+        {loading && (
+          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground tracking-wide">
+                Generating Top 50 {selectedIndustry} chart...
+              </p>
+              <p className="text-sm text-muted-foreground/70 mt-2">
+                Curating the hottest tracks just for you
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-                    {/* Play Button */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handlePlaySong(song)}
-                      disabled={playingRank === song.rank}
-                    >
-                      {playingRank === song.rank ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                ))}
+        {/* Chart Display */}
+        {chartData && !loading && (
+          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-primary/10">
+              <div>
+                <CardTitle className="flex items-center gap-2 font-display tracking-wide">
+                  <Music className="h-5 w-5 text-primary" />
+                  TOP 50 {chartData.industry.toUpperCase()}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {chartData.language} • Updated {new Date(chartData.generatedAt).toLocaleDateString()}
+                </p>
               </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => fetchChart(chartData.industry)}
+                disabled={loading}
+                className="text-primary hover:bg-primary/10"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[500px]">
+                <div className="p-4 space-y-1">
+                  {chartData.chart.map((song) => (
+                    <div
+                      key={song.rank}
+                      className="flex items-center gap-3 p-3 rounded hover:bg-primary/5 transition-colors group border-b border-primary/5 last:border-0"
+                    >
+                      {/* Rank Badge */}
+                      <div className={`w-8 h-8 rounded flex items-center justify-center text-sm ${getRankStyle(song.rank)}`}>
+                        {song.rank}
+                      </div>
 
-      {/* Empty State */}
-      {!selectedIndustry && !loading && (
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <TrendingUp className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground text-center">
-              Select an industry above to see the Top 50 trending songs
-            </p>
-          </CardContent>
-        </Card>
-      )}
+                      {/* Song Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate text-foreground">{song.title}</p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {song.artists.join(", ")} • {song.movie}
+                        </p>
+                      </div>
+
+                      {/* Play Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:bg-primary/10"
+                        onClick={() => handlePlaySong(song)}
+                        disabled={playingRank === song.rank}
+                      >
+                        {playingRank === song.rank ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Empty State */}
+        {!selectedIndustry && !loading && (
+          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <TrendingUp className="h-12 w-12 text-primary/30 mb-4" />
+              <p className="text-muted-foreground text-center tracking-wide">
+                Select an industry above to see the Top 50 trending songs
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </section>
   );
 };
