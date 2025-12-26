@@ -15,25 +15,7 @@ const formatTime = (seconds: number): string => {
 };
 
 const MusicPlayer = () => {
-  const {
-    isPlaying,
-    currentTime,
-    duration,
-    volume,
-    currentTrack,
-    togglePlay,
-    seek,
-    setVolume,
-    shuffle,
-    repeat,
-    autoplay,
-    toggleShuffle,
-    toggleRepeat,
-    toggleAutoplay,
-    playNext,
-    playPrevious,
-  } = usePlayer();
-  
+  const { isPlaying, currentTime, duration, volume, currentTrack, togglePlay, seek, setVolume, shuffle, repeat, autoplay, toggleShuffle, toggleRepeat, toggleAutoplay, playNext, playPrevious } = usePlayer();
   const { isLiked, toggleLike } = useLikedTracks();
   const { isAuthenticated } = useAuth();
 
@@ -50,57 +32,36 @@ const MusicPlayer = () => {
   };
 
   const handleLike = () => {
-    if (currentTrackId) {
-      toggleLike(currentTrackId);
-    }
+    if (currentTrackId) toggleLike(currentTrackId);
   };
 
   return (
-    <Card className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-card/95 border-t border-border shadow-2xl z-50">
+    <Card className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-background/95 border-t border-primary/30 shadow-[0_-5px_30px_hsl(185_100%_50%/0.1)] z-50">
       <div className="container mx-auto px-4 py-4">
-        {/* Progress Bar */}
         <div className="mb-4">
-          <Slider 
-            value={[progressPercent]} 
-            max={100} 
-            step={0.1} 
-            className="cursor-pointer" 
-            onValueChange={handleProgressChange}
-          />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+          <Slider value={[progressPercent]} max={100} step={0.1} className="cursor-pointer" onValueChange={handleProgressChange} />
+          <div className="flex justify-between text-xs text-muted-foreground mt-1 font-mono">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-4">
-          {/* Song Info */}
           <div className="flex items-center gap-4 flex-1 min-w-0">
             {currentTrack ? (
               <>
-                <img 
-                  src={currentTrack.thumbnail} 
-                  alt={currentTrack.title}
-                  className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                />
+                <img src={currentTrack.thumbnail} alt={currentTrack.title} className="w-14 h-14 rounded object-cover border border-primary/30" />
                 <div className="min-w-0">
-                  <div className="font-semibold truncate">{currentTrack.title}</div>
+                  <div className="font-semibold truncate text-foreground">{currentTrack.title}</div>
                   <div className="text-sm text-muted-foreground truncate">{currentTrack.artist}</div>
                 </div>
               </>
             ) : (
               <>
-                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                <div className="w-14 h-14 rounded bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
                   <div className="flex gap-1">
                     {[...Array(4)].map((_, i) => (
-                      <div 
-                        key={i} 
-                        className="w-1 bg-white/80 rounded-full animate-wave"
-                        style={{ 
-                          height: '24px',
-                          animationDelay: `${i * 0.1}s` 
-                        }}
-                      />
+                      <div key={i} className="w-1 bg-primary rounded-full animate-wave" style={{ height: '24px', animationDelay: `${i * 0.1}s` }} />
                     ))}
                   </div>
                 </div>
@@ -111,98 +72,46 @@ const MusicPlayer = () => {
               </>
             )}
             {isAuthenticated && currentTrack && (
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                className={`flex-shrink-0 ${currentTrackId && isLiked(currentTrackId) ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
-                onClick={handleLike}
-              >
+              <Button size="icon" variant="ghost" className={`flex-shrink-0 ${currentTrackId && isLiked(currentTrackId) ? "text-primary" : "text-muted-foreground hover:text-primary"}`} onClick={handleLike}>
                 <Heart className={`w-5 h-5 ${currentTrackId && isLiked(currentTrackId) ? "fill-current" : ""}`} />
               </Button>
             )}
           </div>
 
-          {/* Controls */}
           <div className="flex items-center gap-2">
-            <Button 
-              size="icon" 
-              variant="ghost"
-              className={shuffle ? "text-primary" : "text-muted-foreground"}
-              onClick={toggleShuffle}
-            >
+            <Button size="icon" variant="ghost" className={shuffle ? "text-primary" : "text-muted-foreground hover:text-primary"} onClick={toggleShuffle}>
               <Shuffle className="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="ghost" onClick={playPrevious}>
+            <Button size="icon" variant="ghost" onClick={playPrevious} className="text-muted-foreground hover:text-primary">
               <SkipBack className="w-5 h-5" />
             </Button>
-            <Button 
-              size="icon" 
-              className="w-12 h-12 rounded-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30"
-              onClick={togglePlay}
-            >
-              {isPlaying ? (
-                <Pause className="w-6 h-6" />
-              ) : (
-                <Play className="w-6 h-6 ml-0.5" />
-              )}
+            <Button size="icon" className="w-12 h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground glow-primary" onClick={togglePlay}>
+              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
             </Button>
-            <Button size="icon" variant="ghost" onClick={playNext}>
+            <Button size="icon" variant="ghost" onClick={playNext} className="text-muted-foreground hover:text-primary">
               <SkipForward className="w-5 h-5" />
             </Button>
-            <Button 
-              size="icon" 
-              variant="ghost"
-              className={repeat !== "off" ? "text-primary" : "text-muted-foreground"}
-              onClick={toggleRepeat}
-            >
-              {repeat === "one" ? (
-                <Repeat1 className="w-4 h-4" />
-              ) : (
-                <Repeat className="w-4 h-4" />
-              )}
+            <Button size="icon" variant="ghost" className={repeat !== "off" ? "text-primary" : "text-muted-foreground hover:text-primary"} onClick={toggleRepeat}>
+              {repeat === "one" ? <Repeat1 className="w-4 h-4" /> : <Repeat className="w-4 h-4" />}
             </Button>
           </div>
 
-          {/* Volume, Autoplay & Queue */}
           <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    className={autoplay ? "text-primary" : "text-muted-foreground"}
-                    onClick={toggleAutoplay}
-                  >
+                  <Button size="icon" variant="ghost" className={autoplay ? "text-primary" : "text-muted-foreground hover:text-primary"} onClick={toggleAutoplay}>
                     <Sparkles className="w-5 h-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>AI Autoplay {autoplay ? "On" : "Off"}</p>
-                </TooltipContent>
+                <TooltipContent className="bg-card border-primary/30"><p>AI Autoplay {autoplay ? "On" : "Off"}</p></TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <Button size="icon" variant="ghost" className="text-muted-foreground">
-              <ListMusic className="w-5 h-5" />
+            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-primary"><ListMusic className="w-5 h-5" /></Button>
+            <Button size="icon" variant="ghost" onClick={() => setVolume(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-primary">
+              {volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </Button>
-            <Button 
-              size="icon" 
-              variant="ghost"
-              onClick={() => setVolume(volume > 0 ? 0 : 70)}
-            >
-              {volume === 0 ? (
-                <VolumeX className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <Volume2 className="w-5 h-5 text-muted-foreground" />
-              )}
-            </Button>
-            <Slider 
-              value={[volume]} 
-              max={100} 
-              step={1} 
-              className="w-24" 
-              onValueChange={handleVolumeChange}
-            />
+            <Slider value={[volume]} max={100} step={1} className="w-24" onValueChange={handleVolumeChange} />
           </div>
         </div>
       </div>

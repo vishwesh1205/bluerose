@@ -11,42 +11,42 @@ const industries = [
     id: "kollywood",
     title: "Kollywood",
     description: "Top Tamil Hits",
-    color: "from-yellow-500 to-orange-500",
+    color: "from-primary to-secondary",
     language: "Tamil",
   },
   {
     id: "tollywood",
     title: "Tollywood", 
     description: "Top Telugu Hits",
-    color: "from-blue-500 to-purple-500",
+    color: "from-secondary to-primary",
     language: "Telugu",
   },
   {
     id: "bollywood",
     title: "Bollywood",
     description: "Top Hindi Hits",
-    color: "from-pink-500 to-red-500",
+    color: "from-accent to-primary",
     language: "Hindi",
   },
   {
     id: "mollywood",
     title: "Mollywood",
     description: "Top Malayalam Hits",
-    color: "from-green-500 to-teal-500",
+    color: "from-primary to-accent",
     language: "Malayalam",
   },
   {
     id: "hollywood",
     title: "Hollywood",
     description: "Top English Hits",
-    color: "from-indigo-500 to-blue-500",
+    color: "from-secondary to-accent",
     language: "English",
   },
   {
     id: "sandalwood",
     title: "Sandalwood",
     description: "Top Kannada Hits",
-    color: "from-amber-500 to-yellow-500",
+    color: "from-accent to-secondary",
     language: "Kannada",
   },
 ];
@@ -58,7 +58,6 @@ const TrendingPlaylists = () => {
   const playIndustryPlaylist = async (industry: typeof industries[0]) => {
     setLoadingId(industry.id);
     try {
-      // Fetch top charts for this industry
       const { data, error } = await supabase.functions.invoke('top-charts', {
         body: { industry: industry.title, language: industry.language }
       });
@@ -71,7 +70,6 @@ const TrendingPlaylists = () => {
         return;
       }
 
-      // Search and play the first song
       const firstSong = songs[0];
       const searchResponse = await supabase.functions.invoke('youtube-search', {
         body: { query: `${firstSong.song} ${firstSong.artist} ${industry.language} song` }
@@ -88,7 +86,6 @@ const TrendingPlaylists = () => {
           duration: 0
         });
 
-        // Add next few songs to queue
         for (let i = 1; i < Math.min(5, songs.length); i++) {
           const song = songs[i];
           const queueSearch = await supabase.functions.invoke('youtube-search', {
@@ -118,39 +115,54 @@ const TrendingPlaylists = () => {
   };
 
   return (
-    <section className="py-20 px-4">
+    <section className="py-20 px-4 relative">
+      {/* Section divider line */}
+      <div className="absolute top-0 left-0 right-0 h-px tron-line" />
+      
       <div className="container mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold mb-2">
-          Regional <span className="text-primary">Playlists</span>
+        <h2 className="text-3xl md:text-4xl font-bold mb-2 font-display tracking-wide">
+          REGIONAL <span className="text-primary glow-text">PLAYLISTS</span>
         </h2>
-        <p className="text-muted-foreground mb-8">The songs everyone's playing right now — updated to match your world</p>
+        <p className="text-muted-foreground mb-8 tracking-wide">
+          The songs everyone's playing right now — updated to match your world
+        </p>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {industries.map((industry) => (
             <Card 
               key={industry.id}
-              className="group relative overflow-hidden backdrop-blur-sm bg-card/50 border-border hover:bg-card/80 transition-all duration-300 cursor-pointer"
+              className="group relative overflow-hidden bg-card/50 border-primary/20 hover:border-primary/50 transition-all duration-300 cursor-pointer hover:shadow-[0_0_20px_hsl(185_100%_50%/0.2)]"
               onClick={() => playIndustryPlaylist(industry)}
             >
-              <div className="p-6">
-                <div className={`w-full aspect-square rounded-lg bg-gradient-to-br ${industry.color} mb-4 flex items-center justify-center relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                  <span className="text-4xl font-bold text-white/90 drop-shadow-lg">
+              <div className="p-5">
+                <div className={`w-full aspect-square rounded bg-gradient-to-br ${industry.color} mb-4 flex items-center justify-center relative overflow-hidden`}>
+                  {/* Grid overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      backgroundImage: `
+                        linear-gradient(hsl(220 20% 4% / 0.8) 1px, transparent 1px),
+                        linear-gradient(90deg, hsl(220 20% 4% / 0.8) 1px, transparent 1px)
+                      `,
+                      backgroundSize: '20px 20px',
+                    }}
+                  />
+                  <span className="text-5xl font-bold text-primary-foreground drop-shadow-lg font-display relative z-10">
                     {industry.title.charAt(0)}
                   </span>
                   <Button 
                     size="icon"
                     disabled={loadingId === industry.id}
-                    className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-primary hover:bg-primary/90 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all shadow-xl"
+                    className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-background/90 hover:bg-background text-primary border border-primary/50 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all glow-primary"
                   >
                     {loadingId === industry.id ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <Play className="w-5 h-5 ml-0.5" />
+                      <Play className="w-4 h-4 ml-0.5" />
                     )}
                   </Button>
                 </div>
-                <h3 className="font-semibold mb-1">{industry.title}</h3>
+                <h3 className="font-semibold mb-1 text-foreground tracking-wide">{industry.title}</h3>
                 <p className="text-sm text-muted-foreground">{industry.description}</p>
               </div>
             </Card>
