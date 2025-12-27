@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,21 +15,49 @@ interface ChartSong {
   language: string;
 }
 
+// Input validation schema
+const requestSchema = z.object({
+  industry: z.enum([
+    'kollywood', 'tollywood', 'bollywood', 'mollywood', 
+    'hollywood', 'sandalwood', 'kpop', 'jpop'
+  ], { errorMap: () => ({ message: "Invalid industry. Must be one of: kollywood, tollywood, bollywood, mollywood, hollywood, sandalwood, kpop, jpop" }) }),
+});
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { industry } = await req.json();
-    
-    if (!industry) {
-      return new Response(
-        JSON.stringify({ error: "Industry parameter is required" }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Parse and validate request body
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
+    // Normalize industry to lowercase for validation
+    if (body && typeof body === 'object' && 'industry' in body) {
+      (body as Record<string, unknown>).industry = String((body as Record<string, unknown>).industry).toLowerCase();
+    }
+
+    const parseResult = requestSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.log("Validation error:", parseResult.error.issues);
+      return new Response(JSON.stringify({ 
+        error: "Invalid input", 
+        details: parseResult.error.issues.map(i => i.message) 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { industry } = parseResult.data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -45,7 +74,7 @@ serve(async (req) => {
       'jpop': 'Japanese'
     };
 
-    const language = industryLanguageMap[industry.toLowerCase()] || industry;
+    const language = industryLanguageMap[industry] || industry;
 
     console.log(`Generating Top 50 chart for ${industry} (${language})`);
 
@@ -129,7 +158,6 @@ IMPORTANT:
       }
     } catch (parseError) {
       console.error("Failed to parse chart:", parseError);
-      console.log("Raw content:", content);
       return new Response(
         JSON.stringify({ error: "Failed to generate chart. Please try again." }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -163,7 +191,7 @@ IMPORTANT:
   } catch (error) {
     console.error("Error in top-charts function:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "An unexpected error occurred" }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

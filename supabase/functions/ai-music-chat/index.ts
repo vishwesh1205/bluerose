@@ -1,9 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schemas
+const messageSchema = z.object({
+  role: z.enum(['user', 'assistant', 'system']),
+  content: z.string().max(4000, "Message content too long"),
+});
+
+const requestSchema = z.object({
+  message: z.string().min(1, "Message is required").max(1000, "Message too long (max 1000 characters)"),
+  conversationHistory: z.array(messageSchema).max(50, "Conversation history too long").default([]),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,7 +23,30 @@ serve(async (req) => {
   }
 
   try {
-    const { message, conversationHistory } = await req.json();
+    // Parse and validate request body
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const parseResult = requestSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.log("Validation error:", parseResult.error.issues);
+      return new Response(JSON.stringify({ 
+        error: "Invalid input", 
+        details: parseResult.error.issues.map(i => i.message) 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { message, conversationHistory } = parseResult.data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -53,7 +88,7 @@ Always be helpful and make music discovery feel personal and fun!`;
       { role: "user", content: message }
     ];
 
-    console.log("Calling Lovable AI with message:", message);
+    console.log("Calling Lovable AI with message:", message.substring(0, 100));
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -115,7 +150,7 @@ Always be helpful and make music discovery feel personal and fun!`;
 
   } catch (error) {
     console.error("Error in ai-music-chat:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

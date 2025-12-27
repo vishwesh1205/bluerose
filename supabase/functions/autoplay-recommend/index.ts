@@ -1,9 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schemas
+const trackSchema = z.object({
+  title: z.string().max(500).optional(),
+  artist: z.string().max(200).optional(),
+}).passthrough().nullable().optional();
+
+const historyTrackSchema = z.object({
+  title: z.string().max(500).optional(),
+  artist: z.string().max(200).optional(),
+}).passthrough();
+
+const requestSchema = z.object({
+  currentTrack: trackSchema,
+  recentTracks: z.array(historyTrackSchema).max(20).optional().default([]),
+  likedTracks: z.array(historyTrackSchema).max(20).optional().default([]),
+  timeOfDay: z.enum(['morning', 'afternoon', 'evening', 'night']).optional().default('afternoon'),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,14 +30,37 @@ serve(async (req) => {
   }
 
   try {
-    const { currentTrack, recentTracks, likedTracks, timeOfDay } = await req.json();
+    // Parse and validate request body
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const parseResult = requestSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.log("Validation error:", parseResult.error.issues);
+      return new Response(JSON.stringify({ 
+        error: "Invalid input", 
+        details: parseResult.error.issues.map(i => i.message) 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { currentTrack, recentTracks, likedTracks, timeOfDay } = parseResult.data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Autoplay request for:", currentTrack?.title);
+    console.log("Autoplay request for:", currentTrack?.title?.substring(0, 50));
 
     const systemPrompt = `You are an intelligent music recommendation engine for autoplay. Your job is to pick the NEXT song that feels natural and seamless.
 
@@ -47,10 +89,10 @@ Title: ${currentTrack?.title || 'Unknown'}
 Artist: ${currentTrack?.artist || 'Unknown'}
 
 Recent listening history (last 5 songs):
-${recentTracks?.slice(0, 5).map((t: any) => `- ${t.title} by ${t.artist}`).join('\n') || 'No history'}
+${recentTracks?.slice(0, 5).map((t) => `- ${t.title || 'Unknown'} by ${t.artist || 'Unknown'}`).join('\n') || 'No history'}
 
 Liked songs (sample):
-${likedTracks?.slice(0, 5).map((t: any) => `- ${t.title}`).join('\n') || 'No likes'}
+${likedTracks?.slice(0, 5).map((t) => `- ${t.title || 'Unknown'}`).join('\n') || 'No likes'}
 
 Time of day: ${timeOfDay}
 
@@ -121,7 +163,7 @@ Pick the next song that keeps the vibe going!`;
 
   } catch (error) {
     console.error("Error in autoplay-recommend:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
