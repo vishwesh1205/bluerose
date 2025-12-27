@@ -7,6 +7,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useYouTubeSearch, SearchTrack } from "@/hooks/useYouTubeSearch";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
 import { useAuth } from "@/hooks/useAuth";
+import AddToPlaylist from "./AddToPlaylist";
 
 const formatDuration = (seconds: number): string => {
   if (!seconds) return "";
@@ -107,8 +108,8 @@ const SearchSection = () => {
   return (
     <section className="py-16 px-4 relative">
       {/* Abstract decorative orbs */}
-      <div className="abstract-orb w-64 h-64 bg-primary/20 -left-32 top-20" />
-      <div className="abstract-orb w-48 h-48 bg-secondary/20 right-0 top-40" />
+      <div className="absolute w-64 h-64 bg-primary/20 -left-32 top-20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute w-48 h-48 bg-secondary/20 right-0 top-40 rounded-full blur-[80px] pointer-events-none" />
       
       <div className="container mx-auto max-w-4xl relative z-10">
         <h2 className="text-3xl font-bold text-center mb-8 font-display">
@@ -211,7 +212,7 @@ const SearchSection = () => {
                     </p>
                   )}
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                   {isAuthenticated && (
                     <Button
                       size="icon"
@@ -222,6 +223,7 @@ const SearchSection = () => {
                       <Heart className={`w-4 h-4 ${isLiked(track.id) ? "fill-current" : ""}`} />
                     </Button>
                   )}
+                  <AddToPlaylist trackId={track.id} className="h-8 w-8" />
                   <Button
                     size="icon"
                     variant="ghost"

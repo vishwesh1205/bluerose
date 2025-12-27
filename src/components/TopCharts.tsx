@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Play, TrendingUp, Music, RefreshCw } from "lucide-react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
+import AddToPlaylist from "./AddToPlaylist";
 
 interface ChartSong {
   rank: number;
@@ -37,6 +38,7 @@ export const TopCharts = () => {
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(false);
   const [playingRank, setPlayingRank] = useState<number | null>(null);
+  const [lastPlayedTrackId, setLastPlayedTrackId] = useState<string | null>(null);
   const { loadTrack } = usePlayer();
 
   const fetchChart = useCallback(async (industry: string) => {
@@ -87,6 +89,7 @@ export const TopCharts = () => {
       
       if (tracks.length > 0) {
         loadTrack(tracks[0]);
+        setLastPlayedTrackId(tracks[0].id);
         toast.success(`Playing: ${song.title}`);
       } else {
         toast.error("Couldn't find this song on YouTube");
@@ -105,6 +108,12 @@ export const TopCharts = () => {
     if (rank === 3) return "bg-primary/40 text-primary-foreground font-bold";
     if (rank <= 10) return "bg-primary/20 text-primary font-semibold border border-primary/30";
     return "bg-muted text-muted-foreground border border-border";
+  };
+
+  // Generate a track ID for playlist purposes
+  const getTrackIdForSong = (song: ChartSong) => {
+    // Create a deterministic ID from the song info
+    return `chart:${song.title.toLowerCase().replace(/\s+/g, '-')}-${song.artists[0]?.toLowerCase().replace(/\s+/g, '-') || 'unknown'}`;
   };
 
   return (
@@ -200,20 +209,26 @@ export const TopCharts = () => {
                         </p>
                       </div>
 
-                      {/* Play Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary hover:bg-muted/50"
-                        onClick={() => handlePlaySong(song)}
-                        disabled={playingRank === song.rank}
-                      >
-                        {playingRank === song.rank ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Play className="h-4 w-4" />
-                        )}
-                      </Button>
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <AddToPlaylist 
+                          trackId={lastPlayedTrackId || getTrackIdForSong(song)} 
+                          className="h-8 w-8"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted/50"
+                          onClick={() => handlePlaySong(song)}
+                          disabled={playingRank === song.rank}
+                        >
+                          {playingRank === song.rank ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Play className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
