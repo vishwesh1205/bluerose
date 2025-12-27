@@ -6,6 +6,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
 import { useAuth } from "@/hooks/useAuth";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import AddToPlaylist from "./AddToPlaylist";
 
 const formatTime = (seconds: number): string => {
   if (!seconds || isNaN(seconds)) return "0:00";
@@ -71,10 +72,28 @@ const MusicPlayer = () => {
                 </div>
               </>
             )}
-            {isAuthenticated && currentTrack && (
-              <Button size="icon" variant="ghost" className={`flex-shrink-0 ${currentTrackId && isLiked(currentTrackId) ? "text-secondary" : "text-muted-foreground hover:text-secondary"}`} onClick={handleLike}>
-                <Heart className={`w-5 h-5 ${currentTrackId && isLiked(currentTrackId) ? "fill-current" : ""}`} />
-              </Button>
+            {currentTrack && (
+              <div className="flex items-center gap-1">
+                {isAuthenticated && (
+                  <Button size="icon" variant="ghost" className={`flex-shrink-0 ${currentTrackId && isLiked(currentTrackId) ? "text-secondary" : "text-muted-foreground hover:text-secondary"}`} onClick={handleLike}>
+                    <Heart className={`w-5 h-5 ${currentTrackId && isLiked(currentTrackId) ? "fill-current" : ""}`} />
+                  </Button>
+                )}
+                {currentTrackId && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <AddToPlaylist trackId={currentTrackId} />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-card border-border">
+                        <p>Add to playlist</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             )}
           </div>
 
