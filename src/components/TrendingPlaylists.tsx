@@ -11,42 +11,42 @@ const industries = [
     id: "kollywood",
     title: "Kollywood",
     description: "Top Tamil Hits",
-    color: "from-primary to-secondary",
+    gradient: "from-violet-600 to-purple-500",
     language: "Tamil",
   },
   {
     id: "tollywood",
     title: "Tollywood", 
     description: "Top Telugu Hits",
-    color: "from-secondary to-primary",
+    gradient: "from-pink-600 to-rose-500",
     language: "Telugu",
   },
   {
     id: "bollywood",
     title: "Bollywood",
     description: "Top Hindi Hits",
-    color: "from-accent to-primary",
+    gradient: "from-cyan-500 to-teal-500",
     language: "Hindi",
   },
   {
     id: "mollywood",
     title: "Mollywood",
     description: "Top Malayalam Hits",
-    color: "from-primary to-accent",
+    gradient: "from-orange-500 to-amber-500",
     language: "Malayalam",
   },
   {
     id: "hollywood",
     title: "Hollywood",
     description: "Top English Hits",
-    color: "from-secondary to-accent",
+    gradient: "from-blue-600 to-indigo-500",
     language: "English",
   },
   {
     id: "sandalwood",
     title: "Sandalwood",
     description: "Top Kannada Hits",
-    color: "from-accent to-secondary",
+    gradient: "from-emerald-500 to-green-500",
     language: "Kannada",
   },
 ];
@@ -116,14 +116,15 @@ const TrendingPlaylists = () => {
 
   return (
     <section className="py-20 px-4 relative">
-      {/* Section divider line */}
-      <div className="absolute top-0 left-0 right-0 h-px tron-line" />
+      {/* Abstract orbs */}
+      <div className="absolute -left-20 top-1/2 w-40 h-40 bg-secondary/10 rounded-full blur-[80px]" />
+      <div className="absolute -right-20 top-1/3 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
       
-      <div className="container mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold mb-2 font-display tracking-wide">
-          REGIONAL <span className="text-primary glow-text">PLAYLISTS</span>
+      <div className="container mx-auto relative z-10">
+        <h2 className="text-3xl md:text-4xl font-bold mb-2 font-display">
+          Regional <span className="gradient-text">Playlists</span>
         </h2>
-        <p className="text-muted-foreground mb-8 tracking-wide">
+        <p className="text-muted-foreground mb-8">
           The songs everyone's playing right now — updated to match your world
         </p>
         
@@ -131,38 +132,27 @@ const TrendingPlaylists = () => {
           {industries.map((industry) => (
             <Card 
               key={industry.id}
-              className="group relative overflow-hidden bg-card/50 border-primary/20 hover:border-primary/50 transition-all duration-300 cursor-pointer hover:shadow-[0_0_20px_hsl(185_100%_50%/0.2)]"
+              className="group relative overflow-hidden glass-effect border-border/30 hover:border-primary/30 transition-all duration-300 cursor-pointer"
               onClick={() => playIndustryPlaylist(industry)}
             >
               <div className="p-5">
-                <div className={`w-full aspect-square rounded bg-gradient-to-br ${industry.color} mb-4 flex items-center justify-center relative overflow-hidden`}>
-                  {/* Grid overlay */}
-                  <div 
-                    className="absolute inset-0 opacity-30"
-                    style={{
-                      backgroundImage: `
-                        linear-gradient(hsl(220 20% 4% / 0.8) 1px, transparent 1px),
-                        linear-gradient(90deg, hsl(220 20% 4% / 0.8) 1px, transparent 1px)
-                      `,
-                      backgroundSize: '20px 20px',
-                    }}
-                  />
-                  <span className="text-5xl font-bold text-primary-foreground drop-shadow-lg font-display relative z-10">
+                <div className={`w-full aspect-square rounded-lg bg-gradient-to-br ${industry.gradient} mb-4 flex items-center justify-center relative overflow-hidden`}>
+                  <span className="text-5xl font-bold text-white/90 drop-shadow-lg font-display relative z-10">
                     {industry.title.charAt(0)}
                   </span>
                   <Button 
                     size="icon"
                     disabled={loadingId === industry.id}
-                    className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-background/90 hover:bg-background text-primary border border-primary/50 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all glow-primary"
+                    className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white border-0 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all"
                   >
                     {loadingId === industry.id ? (
-                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <Play className="w-4 h-4 ml-0.5" />
                     )}
                   </Button>
                 </div>
-                <h3 className="font-semibold mb-1 text-foreground tracking-wide">{industry.title}</h3>
+                <h3 className="font-semibold mb-1 text-foreground">{industry.title}</h3>
                 <p className="text-sm text-muted-foreground">{industry.description}</p>
               </div>
             </Card>

@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Orbitron", "system-ui", "sans-serif"],
-        display: ["Orbitron", "system-ui", "sans-serif"],
-        body: ["Rajdhani", "system-ui", "sans-serif"],
+        sans: ["Space Grotesk", "system-ui", "sans-serif"],
+        display: ["Syne", "system-ui", "sans-serif"],
+        body: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -62,10 +62,6 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Tron-specific colors
-        cyan: {
-          glow: "hsl(var(--glow-primary))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -85,32 +81,29 @@ export default {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" }
         },
-        "glow-pulse": {
-          "0%, 100%": { 
-            boxShadow: "0 0 10px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.2)" 
-          },
-          "50%": { 
-            boxShadow: "0 0 20px hsl(var(--primary) / 0.6), 0 0 40px hsl(var(--primary) / 0.4), 0 0 60px hsl(var(--primary) / 0.2)" 
-          }
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-20px)" }
         },
-        "wave": {
-          "0%, 100%": { transform: "scaleY(0.5)" },
-          "50%": { transform: "scaleY(1)" }
+        "morph": {
+          "0%, 100%": { borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" },
+          "50%": { borderRadius: "30% 60% 70% 40% / 50% 60% 30% 60%" }
         },
-        "scan-line": {
-          "0%": { transform: "translateY(-100%)" },
-          "100%": { transform: "translateY(100vh)" }
+        "gradient-shift": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" }
         },
-        "flicker": {
-          "0%, 100%": { opacity: "1" },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "0.4" },
           "50%": { opacity: "0.8" }
         },
-        "pulse-glow": {
+        "glow-pulse": {
           "0%, 100%": { 
-            textShadow: "0 0 5px hsl(var(--primary) / 0.5), 0 0 10px hsl(var(--primary) / 0.3)" 
+            boxShadow: "0 0 15px hsl(var(--primary) / 0.3), 0 0 30px hsl(var(--secondary) / 0.2)" 
           },
           "50%": { 
-            textShadow: "0 0 10px hsl(var(--primary) / 0.8), 0 0 20px hsl(var(--primary) / 0.5), 0 0 30px hsl(var(--primary) / 0.3)" 
+            boxShadow: "0 0 25px hsl(var(--primary) / 0.5), 0 0 50px hsl(var(--secondary) / 0.3)" 
           }
         },
       },
@@ -118,11 +111,11 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
+        "float": "float 6s ease-in-out infinite",
+        "morph": "morph 8s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 8s ease infinite",
+        "pulse-soft": "pulse-soft 4s ease-in-out infinite",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
-        "wave": "wave 1s ease-in-out infinite",
-        "scan-line": "scan-line 8s linear infinite",
-        "flicker": "flicker 4s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },

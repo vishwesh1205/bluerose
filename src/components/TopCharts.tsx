@@ -100,26 +100,23 @@ export const TopCharts = () => {
   }, [loadTrack]);
 
   const getRankStyle = (rank: number) => {
-    if (rank === 1) return "bg-primary text-primary-foreground font-bold glow-primary";
-    if (rank === 2) return "bg-primary/70 text-primary-foreground font-bold";
-    if (rank === 3) return "bg-primary/50 text-primary-foreground font-bold";
+    if (rank === 1) return "bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold";
+    if (rank === 2) return "bg-primary/60 text-primary-foreground font-bold";
+    if (rank === 3) return "bg-primary/40 text-primary-foreground font-bold";
     if (rank <= 10) return "bg-primary/20 text-primary font-semibold border border-primary/30";
     return "bg-muted text-muted-foreground border border-border";
   };
 
   return (
     <section className="py-8 px-4 relative">
-      {/* Section divider line */}
-      <div className="absolute top-0 left-0 right-0 h-px tron-line" />
-      
       <div className="container mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <TrendingUp className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold font-display tracking-wide">TOP 50 CHARTS</h2>
-          <Badge variant="outline" className="ml-2 border-primary/50 text-primary">AI Curated</Badge>
+          <h2 className="text-2xl font-bold font-display">Top 50 Charts</h2>
+          <Badge variant="outline" className="ml-2 border-primary/30 text-primary">AI Curated</Badge>
         </div>
 
-        <p className="text-muted-foreground mb-6 tracking-wide">
+        <p className="text-muted-foreground mb-6">
           The songs everyone's playing right now — updated to match your world.
         </p>
 
@@ -132,10 +129,10 @@ export const TopCharts = () => {
               size="sm"
               onClick={() => fetchChart(ind.id)}
               disabled={loading}
-              className={`gap-2 tracking-wide ${
+              className={`gap-2 ${
                 selectedIndustry === ind.id 
-                  ? "bg-primary text-primary-foreground glow-primary" 
-                  : "border-primary/30 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/10"
+                  ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0" 
+                  : "border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-muted/50"
               }`}
             >
               <span>{ind.flag}</span>
@@ -146,10 +143,10 @@ export const TopCharts = () => {
 
         {/* Loading State */}
         {loading && (
-          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+          <Card className="glass-effect border-border/30">
             <CardContent className="flex flex-col items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground tracking-wide">
+              <p className="text-muted-foreground">
                 Generating Top 50 {selectedIndustry} chart...
               </p>
               <p className="text-sm text-muted-foreground/70 mt-2">
@@ -161,12 +158,12 @@ export const TopCharts = () => {
 
         {/* Chart Display */}
         {chartData && !loading && (
-          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-primary/10">
+          <Card className="glass-effect border-border/30">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50">
               <div>
-                <CardTitle className="flex items-center gap-2 font-display tracking-wide">
+                <CardTitle className="flex items-center gap-2 font-display">
                   <Music className="h-5 w-5 text-primary" />
-                  TOP 50 {chartData.industry.toUpperCase()}
+                  Top 50 {chartData.industry}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   {chartData.language} • Updated {new Date(chartData.generatedAt).toLocaleDateString()}
@@ -177,7 +174,7 @@ export const TopCharts = () => {
                 size="icon"
                 onClick={() => fetchChart(chartData.industry)}
                 disabled={loading}
-                className="text-primary hover:bg-primary/10"
+                className="text-muted-foreground hover:text-primary hover:bg-muted/50"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -188,10 +185,10 @@ export const TopCharts = () => {
                   {chartData.chart.map((song) => (
                     <div
                       key={song.rank}
-                      className="flex items-center gap-3 p-3 rounded hover:bg-primary/5 transition-colors group border-b border-primary/5 last:border-0"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group border-b border-border/20 last:border-0"
                     >
                       {/* Rank Badge */}
-                      <div className={`w-8 h-8 rounded flex items-center justify-center text-sm ${getRankStyle(song.rank)}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${getRankStyle(song.rank)}`}>
                         {song.rank}
                       </div>
 
@@ -207,7 +204,7 @@ export const TopCharts = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:bg-primary/10"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary hover:bg-muted/50"
                         onClick={() => handlePlaySong(song)}
                         disabled={playingRank === song.rank}
                       >
@@ -227,10 +224,10 @@ export const TopCharts = () => {
 
         {/* Empty State */}
         {!selectedIndustry && !loading && (
-          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+          <Card className="glass-effect border-border/30">
             <CardContent className="flex flex-col items-center justify-center py-16">
-              <TrendingUp className="h-12 w-12 text-primary/30 mb-4" />
-              <p className="text-muted-foreground text-center tracking-wide">
+              <TrendingUp className="h-12 w-12 text-muted-foreground/30 mb-4" />
+              <p className="text-muted-foreground text-center">
                 Select an industry above to see the Top 50 trending songs
               </p>
             </CardContent>
