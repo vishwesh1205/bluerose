@@ -1,10 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schemas
+const searchParamsSchema = z.object({
+  q: z.string().min(1, "Query is required").max(200, "Query too long"),
+  limit: z.number().int().min(1).max(50).default(20),
+});
+
+const trackParamsSchema = z.object({
+  videoId: z.string().min(1, "Video ID is required").max(20, "Invalid video ID").regex(/^[a-zA-Z0-9_-]+$/, "Invalid video ID format"),
+});
 
 // Parse ISO 8601 duration to seconds
 function parseISO8601Duration(duration: string): number {
@@ -58,17 +69,23 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (action === "search") {
-      const query = url.searchParams.get("q");
-      const limit = parseInt(url.searchParams.get("limit") || "20", 10);
-      
-      if (!query) {
+      // Validate input parameters
+      const rawLimit = url.searchParams.get("limit");
+      const parseResult = searchParamsSchema.safeParse({
+        q: url.searchParams.get("q"),
+        limit: rawLimit ? parseInt(rawLimit, 10) : 20,
+      });
+
+      if (!parseResult.success) {
+        console.log("Validation error:", parseResult.error.issues);
         return new Response(
-          JSON.stringify({ error: "Query parameter 'q' is required" }),
+          JSON.stringify({ error: "Invalid input", details: parseResult.error.issues.map(i => i.message) }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      console.log(`Searching YouTube for: ${query}`);
+      const { q: query, limit } = parseResult.data;
+      console.log(`Searching YouTube for: ${query} (limit: ${limit})`);
       
       // Check cache first
       const cacheKey = `search:${query}:${limit}`;
@@ -88,7 +105,7 @@ serve(async (req) => {
         const errorText = await searchResp.text();
         console.error("YouTube search error:", errorText);
         return new Response(
-          JSON.stringify({ error: "YouTube API error", details: errorText }),
+          JSON.stringify({ error: "YouTube API error" }),
           { status: searchResp.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -151,15 +168,20 @@ serve(async (req) => {
     }
 
     if (action === "track") {
-      const videoId = url.searchParams.get("videoId");
-      
-      if (!videoId) {
+      // Validate input parameters
+      const parseResult = trackParamsSchema.safeParse({
+        videoId: url.searchParams.get("videoId"),
+      });
+
+      if (!parseResult.success) {
+        console.log("Validation error:", parseResult.error.issues);
         return new Response(
-          JSON.stringify({ error: "Parameter 'videoId' is required" }),
+          JSON.stringify({ error: "Invalid input", details: parseResult.error.issues.map(i => i.message) }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
+      const { videoId } = parseResult.data;
       const trackId = `yt:${videoId}`;
       
       // Check database cache first
@@ -232,7 +254,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in youtube-search function:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "An unexpected error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
