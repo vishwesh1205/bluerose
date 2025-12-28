@@ -39,7 +39,7 @@ const Navbar = () => {
           {[
             { icon: Search, label: "Search", path: "/search" },
             { icon: Heart, label: "Liked", path: null },
-            { icon: ListMusic, label: "Playlists", path: null },
+            { icon: ListMusic, label: "Playlists", path: "/playlists" },
             { icon: MessageCircle, label: "AI Chat", path: null },
           ].map(({ icon: Icon, label, path }) => (
             <Button 
