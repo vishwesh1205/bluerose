@@ -37,16 +37,17 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-1">
           {[
-            { icon: Search, label: "Search" },
-            { icon: Heart, label: "Liked" },
-            { icon: ListMusic, label: "Playlists" },
-            { icon: MessageCircle, label: "AI Chat" },
-          ].map(({ icon: Icon, label }) => (
+            { icon: Search, label: "Search", path: "/search" },
+            { icon: Heart, label: "Liked", path: null },
+            { icon: ListMusic, label: "Playlists", path: null },
+            { icon: MessageCircle, label: "AI Chat", path: null },
+          ].map(({ icon: Icon, label, path }) => (
             <Button 
               key={label}
               variant="ghost" 
               size="sm" 
               className="gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 font-medium"
+              onClick={() => path && navigate(path)}
             >
               <Icon className="w-4 h-4" />
               {label}

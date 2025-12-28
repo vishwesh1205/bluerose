@@ -1,6 +1,5 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-import SearchSection from "@/components/SearchSection";
 import TrendingPlaylists from "@/components/TrendingPlaylists";
 import AICompanion from "@/components/AICompanion";
 import MusicPlayer from "@/components/MusicPlayer";
@@ -14,7 +13,6 @@ const Index = () => {
         <Navbar />
         <main className="pt-16 pb-32">
           <HeroSection />
-          <SearchSection />
           <TopCharts />
           <TrendingPlaylists />
           <AICompanion />
