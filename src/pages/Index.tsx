@@ -7,10 +7,8 @@ import { TopCharts } from "@/components/TopCharts";
 import TrendingPlaylists from "@/components/TrendingPlaylists";
 import AICompanion from "@/components/AICompanion";
 import { PlayerProvider } from "@/contexts/PlayerContext";
-
 const Index = () => {
-  return (
-    <PlayerProvider>
+  return <PlayerProvider>
       <div className="flex h-screen bg-background text-foreground overflow-hidden">
         {/* Sidebar - Desktop Only */}
         <AppSidebar />
@@ -24,7 +22,7 @@ const Index = () => {
           <div className="flex-1 overflow-y-auto pb-32 custom-scrollbar">
             <HeroSection />
             <div className="px-6 md:px-10">
-              <TopCharts />
+              
               <TrendingPlaylists />
               <AICompanion />
             </div>
@@ -37,8 +35,6 @@ const Index = () => {
           <MobileNav />
         </main>
       </div>
-    </PlayerProvider>
-  );
+    </PlayerProvider>;
 };
-
 export default Index;
