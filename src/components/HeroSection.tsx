@@ -74,9 +74,7 @@ const HeroSection = () => {
             <Button className="px-8 py-3 bg-foreground text-background rounded-full font-bold flex items-center gap-2 hover:bg-foreground/90">
               <Play size={18} fill="currentColor" /> Play Now
             </Button>
-            <Button variant="outline" className="px-8 py-3 bg-foreground/10 backdrop-blur-md border-foreground/20 rounded-full font-bold hover:bg-foreground/20">
-              Save Album
-            </Button>
+            
           </div>
         </div>
       </section>
