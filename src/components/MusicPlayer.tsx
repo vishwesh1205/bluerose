@@ -1,7 +1,6 @@
-import { Play, Pause, SkipBack, SkipForward, Heart, Volume2, VolumeX, Repeat, Repeat1, Shuffle, ListMusic, Sparkles } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Heart, Volume2, VolumeX, Repeat, Repeat1, Shuffle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Card } from "@/components/ui/card";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,104 +36,141 @@ const MusicPlayer = () => {
   };
 
   return (
-    <Card className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-background/90 border-t border-border/50 z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="mb-4">
-          <Slider value={[progressPercent]} max={100} step={0.1} className="cursor-pointer" onValueChange={handleProgressChange} />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1 font-mono">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+    <div className="hidden md:flex absolute bottom-0 left-0 right-0 h-24 bg-background/80 backdrop-blur-xl border-t border-border/50 px-4 md:px-6 items-center justify-between z-40">
+      {/* Left - Track Info */}
+      <div className="flex items-center gap-4 w-1/4">
+        {currentTrack ? (
+          <>
+            <div className="w-14 h-14 bg-muted rounded-lg overflow-hidden shrink-0 shadow-lg shadow-background/40">
+              <img src={currentTrack.thumbnail} alt={currentTrack.title} className="w-full h-full object-cover" />
+            </div>
+            <div className="hidden sm:block min-w-0">
+              <p className="text-sm font-bold truncate">{currentTrack.title}</p>
+              <p className="text-xs text-muted-foreground truncate">{currentTrack.artist}</p>
+            </div>
+            {isAuthenticated && (
+              <button
+                onClick={handleLike}
+                className={`transition-colors hidden lg:block ${currentTrackId && isLiked(currentTrackId) ? "text-accent" : "text-muted-foreground hover:text-accent"}`}
+              >
+                <Heart size={18} className={currentTrackId && isLiked(currentTrackId) ? "fill-current" : ""} />
+              </button>
+            )}
+            {currentTrackId && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="hidden lg:block">
+                      <AddToPlaylist trackId={currentTrackId} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-card border-border">
+                    <p>Add to playlist</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="w-14 h-14 bg-muted rounded-lg shrink-0"></div>
+            <div className="hidden sm:block min-w-0">
+              <p className="text-sm font-bold truncate text-muted-foreground">No track playing</p>
+              <p className="text-xs text-muted-foreground truncate">Search for music</p>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Center - Controls */}
+      <div className="flex flex-col items-center gap-2 max-w-[40%] flex-1">
+        <div className="flex items-center gap-6">
+          <Button
+            size="icon"
+            variant="ghost"
+            className={shuffle ? "text-primary" : "text-muted-foreground hover:text-foreground"}
+            onClick={toggleShuffle}
+          >
+            <Shuffle size={18} />
+          </Button>
+          <button
+            onClick={playPrevious}
+            className="text-muted-foreground hover:text-foreground transition-all active:scale-90"
+          >
+            <SkipBack size={24} fill="currentColor" />
+          </button>
+          <button
+            onClick={togglePlay}
+            className="w-12 h-12 flex items-center justify-center bg-foreground text-background rounded-full hover:scale-105 transition-transform shadow-xl shadow-foreground/5"
+          >
+            {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+          </button>
+          <button
+            onClick={playNext}
+            className="text-muted-foreground hover:text-foreground transition-all active:scale-90"
+          >
+            <SkipForward size={24} fill="currentColor" />
+          </button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className={repeat !== "off" ? "text-primary" : "text-muted-foreground hover:text-foreground"}
+            onClick={toggleRepeat}
+          >
+            {repeat === "one" ? <Repeat1 size={18} /> : <Repeat size={18} />}
+          </Button>
         </div>
-
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            {currentTrack ? (
-              <>
-                <img src={currentTrack.thumbnail} alt={currentTrack.title} className="w-14 h-14 rounded-lg object-cover border border-border/50" />
-                <div className="min-w-0">
-                  <div className="font-medium truncate text-foreground">{currentTrack.title}</div>
-                  <div className="text-sm text-muted-foreground truncate">{currentTrack.artist}</div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-14 h-14 rounded-lg bg-muted border border-border/50 flex items-center justify-center flex-shrink-0">
-                  <div className="flex gap-1">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="w-1 bg-primary/50 rounded-full" style={{ height: '20px' }} />
-                    ))}
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <div className="font-medium truncate text-muted-foreground">No track selected</div>
-                  <div className="text-sm text-muted-foreground/70 truncate">Search or select a song</div>
-                </div>
-              </>
-            )}
-            {currentTrack && (
-              <div className="flex items-center gap-1">
-                {isAuthenticated && (
-                  <Button size="icon" variant="ghost" className={`flex-shrink-0 ${currentTrackId && isLiked(currentTrackId) ? "text-secondary" : "text-muted-foreground hover:text-secondary"}`} onClick={handleLike}>
-                    <Heart className={`w-5 h-5 ${currentTrackId && isLiked(currentTrackId) ? "fill-current" : ""}`} />
-                  </Button>
-                )}
-                {currentTrackId && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <AddToPlaylist trackId={currentTrackId} />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-card border-border">
-                        <p>Add to playlist</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-            )}
+        <div className="w-full flex items-center gap-3 text-[10px] font-mono text-muted-foreground">
+          <span>{formatTime(currentTime)}</span>
+          <div className="flex-1 relative group cursor-pointer">
+            <Slider
+              value={[progressPercent]}
+              max={100}
+              step={0.1}
+              onValueChange={handleProgressChange}
+              className="cursor-pointer"
+            />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="ghost" className={shuffle ? "text-primary" : "text-muted-foreground hover:text-foreground"} onClick={toggleShuffle}>
-              <Shuffle className="w-4 h-4" />
-            </Button>
-            <Button size="icon" variant="ghost" onClick={playPrevious} className="text-muted-foreground hover:text-foreground">
-              <SkipBack className="w-5 h-5" />
-            </Button>
-            <Button size="icon" className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground" onClick={togglePlay}>
-              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
-            </Button>
-            <Button size="icon" variant="ghost" onClick={playNext} className="text-muted-foreground hover:text-foreground">
-              <SkipForward className="w-5 h-5" />
-            </Button>
-            <Button size="icon" variant="ghost" className={repeat !== "off" ? "text-primary" : "text-muted-foreground hover:text-foreground"} onClick={toggleRepeat}>
-              {repeat === "one" ? <Repeat1 className="w-4 h-4" /> : <Repeat className="w-4 h-4" />}
-            </Button>
-          </div>
-
-          <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost" className={autoplay ? "text-accent" : "text-muted-foreground hover:text-accent"} onClick={toggleAutoplay}>
-                    <Sparkles className="w-5 h-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-card border-border"><p>AI Autoplay {autoplay ? "On" : "Off"}</p></TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground"><ListMusic className="w-5 h-5" /></Button>
-            <Button size="icon" variant="ghost" onClick={() => setVolume(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-foreground">
-              {volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </Button>
-            <Slider value={[volume]} max={100} step={1} className="w-24" onValueChange={handleVolumeChange} />
-          </div>
+          <span>{formatTime(duration)}</span>
         </div>
       </div>
-    </Card>
+
+      {/* Right - Volume & AI */}
+      <div className="flex items-center justify-end gap-4 w-1/4">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className={autoplay ? "text-secondary" : "text-muted-foreground hover:text-secondary"}
+                onClick={toggleAutoplay}
+              >
+                <Sparkles size={18} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="bg-card border-border">
+              <p>AI Autoplay {autoplay ? "On" : "Off"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <div className="flex items-center gap-2 group w-32">
+          <button
+            onClick={() => setVolume(volume > 0 ? 0 : 70)}
+            className="text-muted-foreground hover:text-foreground shrink-0"
+          >
+            {volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
+          <Slider
+            value={[volume]}
+            max={100}
+            step={1}
+            onValueChange={handleVolumeChange}
+            className="flex-1"
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

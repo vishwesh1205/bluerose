@@ -6,8 +6,10 @@ import { useYouTubeSearch, SearchTrack } from "@/hooks/useYouTubeSearch";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
 import AddToPlaylist from "@/components/AddToPlaylist";
-import Navbar from "@/components/Navbar";
+import AppSidebar from "@/components/AppSidebar";
+import AppHeader from "@/components/AppHeader";
 import MusicPlayer from "@/components/MusicPlayer";
+import MobileNav from "@/components/MobileNav";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 
 const SearchContent = () => {
@@ -78,42 +80,28 @@ const SearchContent = () => {
       thumbnail: track.thumbnail,
       duration: track.duration,
     };
-    
-    // Add all results to queue and play selected
-    results.forEach((t, idx) => {
-      const qTrack = {
-        id: t.id,
-        videoId: t.videoId,
-        title: t.title,
-        artist: t.artists.join(", "),
-        thumbnail: t.thumbnail,
-        duration: t.duration,
-      };
-      if (idx === results.indexOf(track)) {
-        loadTrack(qTrack);
-      }
-    });
+    loadTrack(playerTrack);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="pt-24 pb-32 px-4">
-        <div className="container mx-auto max-w-4xl">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+      <AppSidebar />
+      
+      <main className="flex-1 flex flex-col overflow-hidden relative">
+        <AppHeader />
+        
+        <div className="flex-1 overflow-y-auto px-6 md:px-10 pb-32 custom-scrollbar">
           {/* Search Header */}
-          <div className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold gradient-text font-display mb-4">
-              Search
-            </h1>
-            <p className="text-muted-foreground text-lg">
+          <div className="mb-8 mt-2">
+            <h2 className="text-3xl font-bold mb-2">Search</h2>
+            <p className="text-muted-foreground">
               Find your favorite songs, artists, or paste a YouTube URL
             </p>
           </div>
 
           {/* Search Bar */}
-          <div className="relative mb-12">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl rounded-2xl" />
-            <div className="relative flex gap-3">
+          <div className="relative mb-8">
+            <div className="flex gap-3">
               <div className="relative flex-1">
                 <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -122,13 +110,13 @@ const SearchContent = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-12 pr-4 py-6 text-lg bg-card/80 backdrop-blur-sm border-border/50 rounded-xl focus:border-primary/50 focus:ring-primary/20"
+                  className="w-full pl-12 pr-4 py-6 text-lg bg-card border-border rounded-xl focus:border-primary focus:ring-primary/20"
                 />
               </div>
               <Button
                 onClick={handleSearch}
                 disabled={loading || !searchQuery.trim()}
-                className="px-8 py-6 bg-gradient-to-r from-primary to-secondary hover:opacity-90 rounded-xl font-medium"
+                className="px-8 py-6 bg-primary hover:bg-primary/90 rounded-xl font-medium"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -143,7 +131,7 @@ const SearchContent = () => {
           {results.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-foreground">Results</h2>
+                <h3 className="text-xl font-bold">Results</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -158,7 +146,7 @@ const SearchContent = () => {
                 {results.map((track) => (
                   <div
                     key={track.id}
-                    className="group flex items-center gap-4 p-3 rounded-xl bg-card/50 hover:bg-card/80 border border-border/30 hover:border-primary/30 transition-all duration-300"
+                    className="group flex items-center gap-4 p-3 rounded-xl bg-card/50 hover:bg-card border border-border/30 hover:border-primary/30 transition-all duration-300"
                   >
                     <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
                       <img
@@ -168,9 +156,9 @@ const SearchContent = () => {
                       />
                       <button
                         onClick={() => handlePlayTrack(track)}
-                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                        className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
                       >
-                        <Play className="w-6 h-6 text-white fill-white" />
+                        <Play className="w-6 h-6 text-foreground fill-foreground" />
                       </button>
                     </div>
 
@@ -202,8 +190,8 @@ const SearchContent = () => {
           {/* Empty State */}
           {results.length === 0 && !loading && (
             <div className="text-center py-16">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                <SearchIcon className="w-10 h-10 text-primary/60" />
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+                <SearchIcon className="w-10 h-10 text-muted-foreground" />
               </div>
               <h3 className="text-xl font-medium text-muted-foreground mb-2">
                 Start searching
@@ -214,8 +202,10 @@ const SearchContent = () => {
             </div>
           )}
         </div>
+
+        <MusicPlayer />
+        <MobileNav />
       </main>
-      <MusicPlayer />
     </div>
   );
 };
