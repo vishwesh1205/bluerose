@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { PlayerProvider, usePlayer } from "@/contexts/PlayerContext";
+import { usePlayer } from "@/contexts/PlayerContext";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -233,12 +233,4 @@ const NowPlayingContent = () => {
   );
 };
 
-const NowPlaying = () => {
-  return (
-    <PlayerProvider>
-      <NowPlayingContent />
-    </PlayerProvider>
-  );
-};
-
-export default NowPlaying;
+export default NowPlayingContent;
