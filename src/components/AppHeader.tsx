@@ -20,7 +20,7 @@ const AppHeader = () => {
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
           <Music2 size={20} className="text-primary-foreground" />
         </div>
-        <span className="font-bold text-xl">SonicFlow</span>
+        <span className="font-bold text-xl">Caffeine</span>
       </div>
       
       {/* Desktop spacer */}
