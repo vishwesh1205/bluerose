@@ -1,25 +1,20 @@
-import { Bell, Music2 } from "lucide-react";
+import { Music2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { User, Heart, ListMusic, LogOut } from "lucide-react";
-
 const AppHeader = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, signOut, loading } = useAuth();
-
+  const {
+    user,
+    isAuthenticated,
+    signOut,
+    loading
+  } = useAuth();
   const userInitial = user?.email?.charAt(0).toUpperCase() || "U";
-
-  return (
-    <header className="h-20 flex items-center justify-between px-6 md:px-10 shrink-0 z-10">
+  return <header className="h-20 flex items-center justify-between px-6 md:px-10 shrink-0 z-10">
       {/* Mobile Logo */}
       <div className="flex items-center gap-2 md:hidden">
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -33,15 +28,9 @@ const AppHeader = () => {
 
       {/* Right side */}
       <div className="flex items-center gap-4">
-        <button className="p-2 text-muted-foreground hover:text-foreground transition-colors relative">
-          <Bell size={20} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-background"></span>
-        </button>
+        
 
-        {loading ? (
-          <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
-        ) : isAuthenticated ? (
-          <div className="flex items-center gap-3 pl-4 border-l border-border">
+        {loading ? <div className="w-10 h-10 rounded-full bg-muted animate-pulse" /> : isAuthenticated ? <div className="flex items-center gap-3 pl-4 border-l border-border">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium">{user?.email?.split('@')[0]}</p>
               <p className="text-xs text-primary">Premium</p>
@@ -72,27 +61,16 @@ const AppHeader = () => {
                   My Playlists
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border" />
-                <DropdownMenuItem
-                  onClick={signOut}
-                  className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10"
-                >
+                <DropdownMenuItem onClick={signOut} className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10">
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        ) : (
-          <Button
-            onClick={() => navigate("/auth")}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-          >
+          </div> : <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
             Sign In
-          </Button>
-        )}
+          </Button>}
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default AppHeader;
