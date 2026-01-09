@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
@@ -14,10 +15,14 @@ import {
   Shuffle,
   Repeat,
   Repeat1,
-  ListMusic
+  ListMusic,
+  GripVertical,
+  X,
+  ChevronUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import AddToPlaylist from "@/components/AddToPlaylist";
 
 const formatTime = (seconds: number): string => {
@@ -29,6 +34,9 @@ const formatTime = (seconds: number): string => {
 
 const NowPlayingContent = () => {
   const navigate = useNavigate();
+  const [showQueue, setShowQueue] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  
   const {
     isPlaying,
     currentTime,
@@ -45,7 +53,10 @@ const NowPlayingContent = () => {
     playNext,
     playPrevious,
     queue,
-    queueIndex
+    queueIndex,
+    playAtIndex,
+    removeFromQueue,
+    reorderQueue
   } = usePlayer();
   
   const { isLiked, toggleLike } = useLikedTracks();
@@ -67,13 +78,31 @@ const NowPlayingContent = () => {
     if (currentTrackId) toggleLike(currentTrackId);
   };
 
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== index) {
+      reorderQueue(draggedIndex, index);
+      setDraggedIndex(index);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
   // Generate gradient based on track
   const gradientColors = currentTrack 
     ? "from-primary/30 via-secondary/20 to-background" 
     : "from-muted/30 to-background";
 
+  const upcomingTracks = queue.slice(queueIndex + 1);
+
   return (
-    <div className={`min-h-screen bg-gradient-to-b ${gradientColors} flex flex-col`}>
+    <div className={`min-h-screen bg-gradient-to-b ${gradientColors} flex flex-col relative`}>
       {/* Header */}
       <header className="flex items-center justify-between p-6">
         <Button
@@ -90,8 +119,8 @@ const NowPlayingContent = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/playlists")}
-          className="text-foreground hover:bg-foreground/10"
+          onClick={() => setShowQueue(!showQueue)}
+          className={`text-foreground hover:bg-foreground/10 ${showQueue ? 'text-primary' : ''}`}
         >
           <ListMusic size={24} />
         </Button>
@@ -222,13 +251,109 @@ const NowPlayingContent = () => {
           />
         </div>
 
-        {/* Queue Info */}
+        {/* Queue Info Button */}
         {queue.length > 1 && (
-          <div className="mt-8 text-sm text-muted-foreground">
-            Track {queueIndex + 1} of {queue.length}
-          </div>
+          <button 
+            onClick={() => setShowQueue(!showQueue)}
+            className="mt-8 text-sm text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
+          >
+            <span>Track {queueIndex + 1} of {queue.length}</span>
+            {showQueue ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+          </button>
         )}
       </div>
+
+      {/* Queue Panel */}
+      {showQueue && (
+        <div className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border rounded-t-3xl max-h-[60vh] flex flex-col z-50 animate-in slide-in-from-bottom duration-300">
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h3 className="font-bold text-lg">Queue</h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowQueue(false)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X size={20} />
+            </Button>
+          </div>
+          
+          <ScrollArea className="flex-1 p-4">
+            {/* Now Playing */}
+            {currentTrack && (
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Now Playing</p>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                  <img 
+                    src={currentTrack.thumbnail} 
+                    alt={currentTrack.title}
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate text-primary">{currentTrack.title}</p>
+                    <p className="text-sm text-muted-foreground truncate">{currentTrack.artist}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Up Next */}
+            {upcomingTracks.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Up Next</p>
+                <div className="space-y-1">
+                  {upcomingTracks.map((track, index) => {
+                    const actualIndex = queueIndex + 1 + index;
+                    return (
+                      <div
+                        key={`${track.videoId}-${actualIndex}`}
+                        draggable
+                        onDragStart={() => handleDragStart(actualIndex)}
+                        onDragOver={(e) => handleDragOver(e, actualIndex)}
+                        onDragEnd={handleDragEnd}
+                        className={`flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 cursor-pointer group transition-colors ${
+                          draggedIndex === actualIndex ? 'opacity-50 bg-muted' : ''
+                        }`}
+                        onClick={() => playAtIndex(actualIndex)}
+                      >
+                        <div className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground">
+                          <GripVertical size={18} />
+                        </div>
+                        <img 
+                          src={track.thumbnail} 
+                          alt={track.title}
+                          className="w-10 h-10 rounded-lg object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate group-hover:text-primary transition-colors">{track.title}</p>
+                          <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFromQueue(actualIndex);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {upcomingTracks.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <ListMusic size={40} className="mx-auto mb-3 opacity-50" />
+                <p>No upcoming tracks</p>
+                <p className="text-sm">Search for music to add to your queue</p>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+      )}
     </div>
   );
 };
