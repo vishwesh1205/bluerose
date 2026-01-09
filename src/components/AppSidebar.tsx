@@ -15,8 +15,7 @@ const AppSidebar = () => {
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
           <Music2 size={20} className="text-primary-foreground" />
         </div>
-        <span className="font-bold text-xl tracking-tight gradient-text-brand">caffeine
-      </span>
+        <span className="font-bold text-xl tracking-tight gradient-text-brand">Caffeine</span>
       </div>
 
       {/* Main Navigation */}

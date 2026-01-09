@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search as SearchIcon, Play, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import MobileNav from "@/components/MobileNav";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 
 const SearchContent = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const { results, loading, search, clearResults } = useYouTubeSearch();
   const { loadTrack, addToQueue, queue, playAtIndex } = usePlayer();
@@ -81,6 +83,8 @@ const SearchContent = () => {
       duration: track.duration,
     };
     loadTrack(playerTrack);
+    // Navigate to Now Playing page after loading track
+    navigate("/now-playing");
   };
 
   return (

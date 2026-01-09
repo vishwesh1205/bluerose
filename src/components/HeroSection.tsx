@@ -54,7 +54,16 @@ const HeroSection = () => {
       <div className="mb-8 mt-2">
         <h2 className="text-3xl font-bold mb-6">Good evening</h2>
         <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-          {categories.map((cat, i) => {})}
+          {categories.map((cat, i) => (
+            <button 
+              key={i} 
+              className={`px-6 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${
+                i === 0 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-card text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
       </div>
 

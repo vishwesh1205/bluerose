@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Play, Pause, SkipBack, SkipForward, Heart, Volume2, VolumeX, Repeat, Repeat1, Shuffle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -13,6 +14,7 @@ const formatTime = (seconds: number): string => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 const MusicPlayer = () => {
+  const navigate = useNavigate();
   const {
     isPlaying,
     currentTime,
@@ -51,14 +53,17 @@ const MusicPlayer = () => {
     if (currentTrackId) toggleLike(currentTrackId);
   };
   return <div className="hidden md:flex absolute bottom-0 left-0 right-0 h-24 bg-background/80 backdrop-blur-xl border-t border-border/50 px-4 md:px-6 items-center justify-between z-40">
-      {/* Left - Track Info */}
-      <div className="flex items-center gap-4 w-1/4">
+      {/* Left - Track Info (clickable to open Now Playing) */}
+      <div 
+        className="flex items-center gap-4 w-1/4 cursor-pointer group"
+        onClick={() => currentTrack && navigate("/now-playing")}
+      >
         {currentTrack ? <>
-            <div className="w-14 h-14 bg-muted rounded-lg overflow-hidden shrink-0 shadow-lg shadow-background/40">
+            <div className="w-14 h-14 bg-muted rounded-lg overflow-hidden shrink-0 shadow-lg shadow-background/40 group-hover:ring-2 group-hover:ring-primary transition-all">
               <img src={currentTrack.thumbnail} alt={currentTrack.title} className="w-full h-full object-cover" />
             </div>
             <div className="hidden sm:block min-w-0">
-              <p className="text-sm font-bold truncate">{currentTrack.title}</p>
+              <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">{currentTrack.title}</p>
               <p className="text-xs text-muted-foreground truncate">{currentTrack.artist}</p>
             </div>
             {isAuthenticated && <button onClick={handleLike} className={`transition-colors hidden lg:block ${currentTrackId && isLiked(currentTrackId) ? "text-accent" : "text-muted-foreground hover:text-accent"}`}>
