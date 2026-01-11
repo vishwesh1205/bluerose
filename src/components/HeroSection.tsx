@@ -99,9 +99,10 @@ const HeroSection = () => {
 
       {/* New Releases Carousel */}
       <section className="mb-12">
-        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {trendingAlbums.map(album => {})}
+          {trendingAlbums.map(album => (
+            <div key={album.id}>{album.title}</div>
+          ))}
         </div>
       </section>
     </div>;

@@ -115,7 +115,7 @@ const TrendingPlaylists = () => {
   };
 
   return (
-    <section className="py-20 px-4 relative">
+    <section className="pt-6 pb-20 px-4 relative">
       {/* Abstract orbs */}
       <div className="absolute -left-20 top-1/2 w-40 h-40 bg-secondary/10 rounded-full blur-[80px]" />
       <div className="absolute -right-20 top-1/3 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
