@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, Play, Loader2, Heart, Link2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,18 @@ const formatDuration = (seconds: number): string => {
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
+
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 const demoTracks: SearchTrack[] = [
   {
@@ -56,12 +69,15 @@ const demoTracks: SearchTrack[] = [
 ];
 
 const SearchSection = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
   const [hasSearched, setHasSearched] = useState(false);
-  const { loadVideoById, isReady } = usePlayer();
+  const { loadTrack, isReady } = usePlayer();
   const { results, loading, search, clearResults } = useYouTubeSearch();
   const { isLiked, toggleLike } = useLikedTracks();
   const { isAuthenticated } = useAuth();
+  const lastSearchedRef = useRef("");
 
   const extractVideoId = (url: string): string | null => {
     const patterns = [
@@ -80,6 +96,16 @@ const SearchSection = () => {
     return input.includes('youtube.com') || input.includes('youtu.be') || /^[a-zA-Z0-9_-]{11}$/.test(input.trim());
   };
 
+  // Auto-search on debounced query change
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim();
+    if (trimmed && trimmed.length >= 2 && !isYouTubeUrl(trimmed) && trimmed !== lastSearchedRef.current) {
+      lastSearchedRef.current = trimmed;
+      setHasSearched(true);
+      search(trimmed);
+    }
+  }, [debouncedQuery, search]);
+
   const handleSubmit = useCallback(async () => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return;
@@ -88,20 +114,39 @@ const SearchSection = () => {
     if (isYouTubeUrl(trimmedQuery)) {
       const videoId = extractVideoId(trimmedQuery);
       if (videoId) {
-        loadVideoById(videoId);
+        const track = {
+          id: videoId,
+          videoId,
+          title: "Loading...",
+          artist: "Unknown Artist",
+          thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+          duration: 0,
+        };
+        loadTrack(track);
+        navigate("/now-playing");
         setQuery("");
         return;
       }
     }
 
     // Otherwise, perform search
+    lastSearchedRef.current = trimmedQuery;
     setHasSearched(true);
     await search(trimmedQuery);
-  }, [query, search, loadVideoById]);
+  }, [query, search, loadTrack, navigate]);
 
-  const handlePlayTrack = (track: SearchTrack) => {
-    loadVideoById(track.videoId, track.title, track.artists[0] || "Unknown Artist");
-  };
+  const handlePlayTrack = useCallback((track: SearchTrack) => {
+    const playerTrack = {
+      id: track.id,
+      videoId: track.videoId,
+      title: track.title,
+      artist: track.artists[0] || "Unknown Artist",
+      thumbnail: track.thumbnail,
+      duration: track.duration,
+    };
+    loadTrack(playerTrack);
+    navigate("/now-playing");
+  }, [loadTrack, navigate]);
 
   const displayTracks = hasSearched && results.length > 0 ? results : (!hasSearched ? demoTracks : []);
 
