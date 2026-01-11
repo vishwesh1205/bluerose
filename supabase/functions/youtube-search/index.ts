@@ -139,7 +139,7 @@ serve(async (req) => {
       // Cache results
       setCache(cacheKey, results);
 
-      // Store tracks in database for future reference
+      // Store tracks in database asynchronously (don't await - fire and forget for speed)
       if (results.length > 0) {
         const tracksToUpsert = results.map((r: any) => ({
           id: r.id,
@@ -152,13 +152,13 @@ serve(async (req) => {
           metadata: { channelTitle: r.channelTitle, publishedAt: r.publishedAt },
         }));
 
-        const { error: upsertError } = await supabase
+        // Fire and forget - don't block response
+        supabase
           .from("tracks")
-          .upsert(tracksToUpsert, { onConflict: "id", ignoreDuplicates: true });
-        
-        if (upsertError) {
-          console.log("Track upsert note:", upsertError.message);
-        }
+          .upsert(tracksToUpsert, { onConflict: "id", ignoreDuplicates: true })
+          .then(({ error }) => {
+            if (error) console.log("Track upsert note:", error.message);
+          });
       }
 
       console.log(`Found ${results.length} tracks`);
@@ -229,8 +229,8 @@ serve(async (req) => {
         source: "youtube",
       };
 
-      // Cache to database
-      await supabase.from("tracks").upsert({
+      // Cache to database asynchronously (fire and forget)
+      supabase.from("tracks").upsert({
         id: track.id,
         video_id: track.videoId,
         title: track.title,
@@ -239,7 +239,7 @@ serve(async (req) => {
         thumbnail: track.thumbnail,
         source: track.source,
         metadata: { channelTitle: v.snippet.channelTitle },
-      }, { onConflict: "id" });
+      }, { onConflict: "id" }).then(() => {});
 
       return new Response(JSON.stringify(track), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
