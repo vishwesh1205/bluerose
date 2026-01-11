@@ -54,16 +54,9 @@ const HeroSection = () => {
       <div className="mb-8 mt-2">
         <h2 className="text-3xl font-bold mb-6">Good evening</h2>
         <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-          {categories.map((cat, i) => (
-            <button 
-              key={i} 
-              className={`px-6 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${
-                i === 0 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-card text-muted-foreground hover:bg-muted'
-              }`}
-            >
+          {categories.map((cat, i) => <button key={i} className={`px-6 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${i === 0 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-card text-muted-foreground hover:bg-muted'}`}>
               {cat}
-            </button>
-          ))}
+            </button>)}
         </div>
       </div>
 
@@ -106,27 +99,9 @@ const HeroSection = () => {
 
       {/* New Releases Carousel */}
       <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold">New Releases</h3>
-          <button className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest">
-            Show All
-          </button>
-        </div>
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {trendingAlbums.map(album => <div key={album.id} className="group cursor-pointer">
-              <div className="relative aspect-square rounded-2xl overflow-hidden mb-4 shadow-lg ring-1 ring-border">
-                <img src={album.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={album.title} />
-                <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <button className="p-4 bg-foreground text-background rounded-full transform scale-90 group-hover:scale-100 transition-transform">
-                    <Play size={20} fill="currentColor" />
-                  </button>
-                </div>
-              </div>
-              <h4 className="font-bold text-sm truncate mb-0.5">{album.title}</h4>
-              <p className="text-xs text-muted-foreground truncate">
-                {album.artist} • {album.year}
-              </p>
-            </div>)}
+          {trendingAlbums.map(album => {})}
         </div>
       </section>
     </div>;
