@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search as SearchIcon, Play, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,12 +13,26 @@ import MusicPlayer from "@/components/MusicPlayer";
 import MobileNav from "@/components/MobileNav";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 const SearchContent = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQuery = useDebounce(searchQuery, 300);
   const { results, loading, search, clearResults } = useYouTubeSearch();
-  const { loadTrack, addToQueue, queue, playAtIndex } = usePlayer();
-  const { likedTrackIds, isLiked } = useLikedTracks();
+  const { loadTrack } = usePlayer();
+  const { isLiked } = useLikedTracks();
+  const lastSearchedRef = useRef("");
 
   const isYouTubeUrl = (text: string) => {
     const youtubePatterns = [
@@ -45,7 +59,16 @@ const SearchContent = () => {
     return null;
   };
 
-  const handleSearch = async () => {
+  // Auto-search on debounced query change
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim();
+    if (trimmed && trimmed.length >= 2 && !isYouTubeUrl(trimmed) && trimmed !== lastSearchedRef.current) {
+      lastSearchedRef.current = trimmed;
+      search(trimmed);
+    }
+  }, [debouncedQuery, search]);
+
+  const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return;
 
     if (isYouTubeUrl(searchQuery)) {
@@ -60,12 +83,14 @@ const SearchContent = () => {
           duration: 0,
         };
         loadTrack(track);
+        navigate("/now-playing");
         setSearchQuery("");
       }
     } else {
+      lastSearchedRef.current = searchQuery.trim();
       await search(searchQuery);
     }
-  };
+  }, [searchQuery, search, loadTrack, navigate]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -73,7 +98,7 @@ const SearchContent = () => {
     }
   };
 
-  const handlePlayTrack = (track: SearchTrack) => {
+  const handlePlayTrack = useCallback((track: SearchTrack) => {
     const playerTrack = {
       id: track.id,
       videoId: track.videoId,
@@ -82,10 +107,10 @@ const SearchContent = () => {
       thumbnail: track.thumbnail,
       duration: track.duration,
     };
+    console.log("Playing track:", playerTrack);
     loadTrack(playerTrack);
-    // Navigate to Now Playing page after loading track
     navigate("/now-playing");
-  };
+  }, [loadTrack, navigate]);
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
