@@ -1,10 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { usePlayer } from "@/contexts/PlayerContext";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const industries = [
   {
@@ -52,66 +49,10 @@ const industries = [
 ];
 
 const TrendingPlaylists = () => {
-  const [loadingId, setLoadingId] = useState<string | null>(null);
-  const { loadTrack, addToQueue } = usePlayer();
+  const navigate = useNavigate();
 
-  const playIndustryPlaylist = async (industry: typeof industries[0]) => {
-    setLoadingId(industry.id);
-    try {
-      const { data, error } = await supabase.functions.invoke('top-charts', {
-        body: { industry: industry.title, language: industry.language }
-      });
-
-      if (error) throw error;
-
-      const songs = data?.songs || [];
-      if (songs.length === 0) {
-        toast.error("No songs found");
-        return;
-      }
-
-      const firstSong = songs[0];
-      const searchResponse = await supabase.functions.invoke('youtube-search', {
-        body: { query: `${firstSong.song} ${firstSong.artist} ${industry.language} song` }
-      });
-
-      if (searchResponse.data?.results?.length > 0) {
-        const result = searchResponse.data.results[0];
-        loadTrack({
-          id: result.videoId,
-          videoId: result.videoId,
-          title: result.title,
-          artist: result.channelTitle,
-          thumbnail: result.thumbnail,
-          duration: 0
-        });
-
-        for (let i = 1; i < Math.min(5, songs.length); i++) {
-          const song = songs[i];
-          const queueSearch = await supabase.functions.invoke('youtube-search', {
-            body: { query: `${song.song} ${song.artist} ${industry.language} song` }
-          });
-          if (queueSearch.data?.results?.length > 0) {
-            const queueResult = queueSearch.data.results[0];
-            addToQueue({
-              id: queueResult.videoId,
-              videoId: queueResult.videoId,
-              title: queueResult.title,
-              artist: queueResult.channelTitle,
-              thumbnail: queueResult.thumbnail,
-              duration: 0
-            });
-          }
-        }
-
-        toast.success(`Playing ${industry.title} Top Hits`);
-      }
-    } catch (error) {
-      console.error('Error playing playlist:', error);
-      toast.error("Failed to load playlist");
-    } finally {
-      setLoadingId(null);
-    }
+  const goToChart = (industry: typeof industries[0]) => {
+    navigate(`/charts/${industry.id}`);
   };
 
   return (
@@ -133,7 +74,7 @@ const TrendingPlaylists = () => {
             <Card 
               key={industry.id}
               className="group relative overflow-hidden glass-effect border-border/30 hover:border-primary/30 transition-all duration-300 cursor-pointer"
-              onClick={() => playIndustryPlaylist(industry)}
+              onClick={() => goToChart(industry)}
             >
               <div className="p-5">
                 <div className={`w-full aspect-square rounded-lg bg-gradient-to-br ${industry.gradient} mb-4 flex items-center justify-center relative overflow-hidden`}>
@@ -142,14 +83,9 @@ const TrendingPlaylists = () => {
                   </span>
                   <Button 
                     size="icon"
-                    disabled={loadingId === industry.id}
                     className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white border-0 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all"
                   >
-                    {loadingId === industry.id ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Play className="w-4 h-4 ml-0.5" />
-                    )}
+                    <Play className="w-4 h-4 ml-0.5" />
                   </Button>
                 </div>
                 <h3 className="font-semibold mb-1 text-foreground">{industry.title}</h3>
