@@ -18,7 +18,6 @@ import { usePlaylists, Playlist, PlaylistTrack } from "@/hooks/usePlaylists";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/hooks/useAuth";
 import AddToPlaylist from "@/components/AddToPlaylist";
-import { PlayerProvider } from "@/contexts/PlayerContext";
 
 const PlaylistsContent = () => {
   const navigate = useNavigate();
@@ -329,12 +328,4 @@ const PlaylistsContent = () => {
   );
 };
 
-const Playlists = () => {
-  return (
-    <PlayerProvider>
-      <PlaylistsContent />
-    </PlayerProvider>
-  );
-};
-
-export default Playlists;
+export default PlaylistsContent;

@@ -11,7 +11,6 @@ import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/AppHeader";
 import MusicPlayer from "@/components/MusicPlayer";
 import MobileNav from "@/components/MobileNav";
-import { PlayerProvider } from "@/contexts/PlayerContext";
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -239,12 +238,4 @@ const SearchContent = () => {
   );
 };
 
-const Search = () => {
-  return (
-    <PlayerProvider>
-      <SearchContent />
-    </PlayerProvider>
-  );
-};
-
-export default Search;
+export default SearchContent;
