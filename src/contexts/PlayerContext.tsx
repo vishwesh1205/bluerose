@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useYouTubePlayer, Track } from "@/hooks/useYouTubePlayer";
+import { useMediaSession } from "@/hooks/useMediaSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -281,6 +282,32 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const toggleAutoplay = useCallback(() => {
     setAutoplay((prev) => !prev);
   }, []);
+
+  // Seek forward/backward handlers for media session
+  const seekForward = useCallback(() => {
+    const newTime = Math.min(player.currentTime + 10, player.duration);
+    player.seek(newTime);
+  }, [player]);
+
+  const seekBackward = useCallback(() => {
+    const newTime = Math.max(player.currentTime - 10, 0);
+    player.seek(newTime);
+  }, [player]);
+
+  // Enable Media Session API for background playback controls
+  useMediaSession({
+    currentTrack: player.currentTrack,
+    isPlaying: player.isPlaying,
+    currentTime: player.currentTime,
+    duration: player.duration,
+    onPlay: player.play,
+    onPause: player.pause,
+    onSeekForward: seekForward,
+    onSeekBackward: seekBackward,
+    onNextTrack: playNextTrack,
+    onPreviousTrack: playPreviousTrack,
+    onSeek: player.seek,
+  });
 
   // Enhanced loadVideoById that adds to queue
   const loadVideoById = useCallback((videoId: string, title?: string, artist?: string) => {
