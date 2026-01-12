@@ -106,25 +106,28 @@ const Charts = () => {
   const playSong = async (song: ChartSong, index: number) => {
     setLoadingIndex(index);
     try {
-      const { data, error } = await supabase.functions.invoke('youtube-search', {
-        body: { query: `${song.title} ${song.artists.join(' ')} ${industryData?.language} song` }
-      });
+      const searchQuery = `${song.title} ${song.artists.join(' ')} ${industryData?.language} song`;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search?action=search&q=${encodeURIComponent(searchQuery)}&limit=1`
+      );
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Search failed');
 
-      const results = data?.results as TrackResult[] || [];
+      const results = await response.json();
       if (results.length > 0) {
         const result = results[0];
         loadTrack({
-          id: result.videoId,
+          id: result.id,
           videoId: result.videoId,
           title: result.title,
-          artist: result.channelTitle,
+          artist: result.artists?.[0] || result.channelTitle,
           thumbnail: result.thumbnail,
-          duration: 0
+          duration: result.duration || 0
         });
         setPlayingIndex(index);
         navigate('/now-playing');
+      } else {
+        toast.error("Couldn't find this song");
       }
     } catch (error) {
       console.error('Error playing song:', error);
@@ -144,20 +147,23 @@ const Charts = () => {
     for (let i = 1; i < Math.min(10, chart.length); i++) {
       const song = chart[i];
       try {
-        const { data } = await supabase.functions.invoke('youtube-search', {
-          body: { query: `${song.title} ${song.artists.join(' ')} ${industryData?.language} song` }
-        });
+        const searchQuery = `${song.title} ${song.artists.join(' ')} ${industryData?.language} song`;
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search?action=search&q=${encodeURIComponent(searchQuery)}&limit=1`
+        );
         
-        const results = data?.results as TrackResult[] || [];
+        if (!response.ok) continue;
+        
+        const results = await response.json();
         if (results.length > 0) {
           const result = results[0];
           addToQueue({
-            id: result.videoId,
+            id: result.id,
             videoId: result.videoId,
             title: result.title,
-            artist: result.channelTitle,
+            artist: result.artists?.[0] || result.channelTitle,
             thumbnail: result.thumbnail,
-            duration: 0
+            duration: result.duration || 0
           });
         }
       } catch (error) {
