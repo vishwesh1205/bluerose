@@ -62,18 +62,31 @@ serve(async (req) => {
 
     const url = new URL(req.url);
     const action = url.searchParams.get("action") || "search";
-    
+
+    // Support both GET query params and legacy POST body payloads
+    let bodyJson: any = null;
+    if (req.method !== "GET") {
+      try {
+        bodyJson = await req.json();
+      } catch {
+        bodyJson = null;
+      }
+    }
+
     // Initialize Supabase client for caching to database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (action === "search") {
-      // Validate input parameters
+      // Validate input parameters (prefer URL params; fallback to POST body)
       const rawLimit = url.searchParams.get("limit");
+      const bodyLimit = bodyJson?.limit ?? bodyJson?.maxResults;
       const parseResult = searchParamsSchema.safeParse({
-        q: url.searchParams.get("q"),
-        limit: rawLimit ? parseInt(rawLimit, 10) : 20,
+        q: url.searchParams.get("q") ?? bodyJson?.q ?? bodyJson?.query,
+        limit: rawLimit
+          ? parseInt(rawLimit, 10)
+          : (typeof bodyLimit === "string" ? parseInt(bodyLimit, 10) : (typeof bodyLimit === "number" ? bodyLimit : 20)),
       });
 
       if (!parseResult.success) {
