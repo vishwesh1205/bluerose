@@ -43,6 +43,7 @@ export const useYouTubePlayer = (): UseYouTubePlayerReturn => {
   const playerRef = useRef<YT.Player | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timeUpdateInterval = useRef<number | null>(null);
+  const pendingTrackRef = useRef<Track | null>(null);
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -102,6 +103,15 @@ export const useYouTubePlayer = (): UseYouTubePlayerReturn => {
         onReady: () => {
           setIsReady(true);
           playerRef.current?.setVolume(volume);
+          playerRef.current?.unMute();
+          
+          // If there's a pending track, play it now
+          if (pendingTrackRef.current) {
+            const track = pendingTrackRef.current;
+            pendingTrackRef.current = null;
+            playerRef.current?.loadVideoById(track.videoId);
+            playerRef.current?.playVideo();
+          }
         },
         onStateChange: (event: YT.OnStateChangeEvent) => {
           setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
@@ -156,7 +166,16 @@ export const useYouTubePlayer = (): UseYouTubePlayerReturn => {
 
   const loadTrack = useCallback((track: Track) => {
     setCurrentTrack(track);
-    playerRef.current?.loadVideoById(track.videoId);
+    
+    if (!playerRef.current) {
+      // Player not ready yet - store for later
+      pendingTrackRef.current = track;
+      return;
+    }
+    
+    playerRef.current.loadVideoById(track.videoId);
+    playerRef.current.unMute();
+    playerRef.current.playVideo();
   }, []);
 
   const loadVideoById = useCallback((videoId: string, title = "Unknown Title", artist = "Unknown Artist") => {
@@ -169,7 +188,16 @@ export const useYouTubePlayer = (): UseYouTubePlayerReturn => {
       duration: 0,
     };
     setCurrentTrack(track);
-    playerRef.current?.loadVideoById(videoId);
+    
+    if (!playerRef.current) {
+      // Player not ready yet - store for later
+      pendingTrackRef.current = track;
+      return;
+    }
+    
+    playerRef.current.loadVideoById(videoId);
+    playerRef.current.unMute();
+    playerRef.current.playVideo();
   }, []);
 
   return {
