@@ -62,23 +62,9 @@ const HeroSection = () => {
 
       {/* Featured Album Hero */}
       <section className="mb-12 relative overflow-hidden rounded-3xl group">
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent z-10"></div>
-        <img src={heroImage} className="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-700" alt="Hero" />
-        <div className="absolute inset-0 z-20 p-8 flex flex-col justify-end max-w-lg">
-          <span className="px-3 py-1 bg-foreground/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest w-fit mb-3">
-            Featured Artist
-          </span>
-          
-          <p className="text-muted-foreground mb-6 line-clamp-2">
-            The latest masterpiece from Digital Ghost. Experience a journey through sound and light.
-          </p>
-          <div className="flex gap-4">
-            <Button className="px-8 py-3 bg-foreground text-background rounded-full font-bold flex items-center gap-2 hover:bg-foreground/90">
-              <Play size={18} fill="currentColor" /> Play Now
-            </Button>
-            
-          </div>
-        </div>
+        
+        
+        
       </section>
 
       {/* Quick Access Grid */}
@@ -100,9 +86,7 @@ const HeroSection = () => {
       {/* New Releases Carousel */}
       <section className="mb-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {trendingAlbums.map(album => (
-            <div key={album.id}>{album.title}</div>
-          ))}
+          {trendingAlbums.map(album => <div key={album.id}>{album.title}</div>)}
         </div>
       </section>
     </div>;
