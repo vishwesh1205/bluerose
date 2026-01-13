@@ -1,6 +1,8 @@
 import React, { createContext, useContext, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useYouTubePlayer, Track } from "@/hooks/useYouTubePlayer";
 import { useMediaSession } from "@/hooks/useMediaSession";
+import { useLikedTracks } from "@/hooks/useLikedTracks";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -32,7 +34,7 @@ interface PlayerContextType {
   removeFromQueue: (index: number) => void;
   reorderQueue: (fromIndex: number, toIndex: number) => void;
   clearQueue: () => void;
-  playNext: () => void;
+  playNext: (wasSkipped?: boolean) => void;
   playPrevious: () => void;
   playAtIndex: (index: number) => void;
   toggleShuffle: () => void;
@@ -44,6 +46,8 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const player = useYouTubePlayer();
+  const { user } = useAuth();
+  const { likedTracks, likedTrackIds } = useLikedTracks();
   
   // Queue state
   const [queue, setQueue] = useState<Track[]>([]);
@@ -52,6 +56,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [repeat, setRepeat] = useState<"off" | "one" | "all">("off");
   const [autoplay, setAutoplay] = useState(true);
   const [recentTracks, setRecentTracks] = useState<Track[]>([]);
+  const [skippedTrackIds, setSkippedTrackIds] = useState<string[]>([]);
   const [isAutoplayLoading, setIsAutoplayLoading] = useState(false);
   
   // Track end detection
@@ -82,14 +87,30 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       else if (hour >= 18 && hour < 22) timeOfDay = "evening";
       else timeOfDay = "night";
 
-      console.log("Fetching autoplay recommendation...");
+      console.log("Fetching algorithmic recommendation...");
       
+      // Build liked tracks data for the recommendation engine
+      const likedTracksData = recentTracks
+        .filter(t => likedTrackIds.has(t.id))
+        .map(t => ({ title: t.title, artist: t.artist, id: t.id }));
+      
+      // Add skipped info to recent tracks
+      const recentTracksWithSkips = recentTracks.map(t => ({
+        title: t.title,
+        artist: t.artist,
+        id: t.id,
+        videoId: t.videoId,
+        skipped: skippedTrackIds.includes(t.videoId),
+      }));
+
       const { data, error } = await supabase.functions.invoke('autoplay-recommend', {
         body: {
           currentTrack: player.currentTrack,
-          recentTracks: recentTracks,
-          likedTracks: [], // Could fetch from useLikedTracks if needed
-          timeOfDay
+          recentTracks: recentTracksWithSkips,
+          likedTracks: likedTracksData,
+          skippedTrackIds: skippedTrackIds.slice(0, 20),
+          timeOfDay,
+          userId: user?.id,
         }
       });
 
@@ -141,7 +162,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsAutoplayLoading(false);
     }
-  }, [player.currentTrack, recentTracks, isAutoplayLoading, player]);
+  }, [player.currentTrack, recentTracks, likedTrackIds, skippedTrackIds, user?.id, isAutoplayLoading, player]);
 
   // Detect track end for auto-next
   useEffect(() => {
@@ -153,11 +174,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         player.seek(0);
         player.play();
       } else if (queue.length > 0 && queueIndex < queue.length - 1) {
-        // Play next in queue
-        playNextTrack();
+        // Play next in queue (natural end, not skipped)
+        playNextTrack(false);
       } else if (repeat === "all" && queue.length > 0) {
         // Loop back to start
-        playNextTrack();
+        playNextTrack(false);
       } else if (autoplay && !isAutoplayLoading) {
         // Queue ended, fetch AI recommendation
         fetchAutoplayRecommendation();
@@ -203,7 +224,15 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setQueueIndex(-1);
   }, []);
 
-  const playNextTrack = useCallback(() => {
+  const playNextTrack = useCallback((wasSkipped = false) => {
+    // Track skipped songs for recommendation improvement
+    if (wasSkipped && player.currentTrack?.videoId) {
+      setSkippedTrackIds(prev => {
+        const updated = [player.currentTrack!.videoId, ...prev].slice(0, 50);
+        return updated;
+      });
+    }
+    
     if (queue.length === 0) return;
 
     let nextIndex: number;
@@ -343,7 +372,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       removeFromQueue,
       reorderQueue,
       clearQueue,
-      playNext: playNextTrack,
+      playNext: (wasSkipped?: boolean) => playNextTrack(wasSkipped),
       playPrevious: playPreviousTrack,
       playAtIndex,
       toggleShuffle,
