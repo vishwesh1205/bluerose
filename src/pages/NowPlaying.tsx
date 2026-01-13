@@ -218,7 +218,7 @@ const NowPlayingContent = () => {
           <Button
             size="icon"
             variant="ghost"
-            onClick={playNext}
+            onClick={() => playNext(true)}
             className="w-14 h-14 text-foreground hover:bg-foreground/10"
           >
             <SkipForward size={32} fill="currentColor" />

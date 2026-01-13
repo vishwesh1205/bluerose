@@ -102,7 +102,7 @@ const MusicPlayer = () => {
           <button onClick={togglePlay} className="w-12 h-12 flex items-center justify-center bg-foreground text-background rounded-full hover:scale-105 transition-transform shadow-xl shadow-foreground/5">
             {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
           </button>
-          <button onClick={playNext} className="text-muted-foreground hover:text-foreground transition-all active:scale-90">
+          <button onClick={() => playNext(true)} className="text-muted-foreground hover:text-foreground transition-all active:scale-90">
             <SkipForward size={24} fill="currentColor" />
           </button>
           <Button size="icon" variant="ghost" className={repeat !== "off" ? "text-primary" : "text-muted-foreground hover:text-foreground"} onClick={toggleRepeat}>
