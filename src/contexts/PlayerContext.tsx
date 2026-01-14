@@ -63,15 +63,61 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const prevIsPlaying = useRef(player.isPlaying);
   const prevCurrentTime = useRef(player.currentTime);
 
-  // Track recently played songs for recommendations
+  // Track recently played songs for recommendations AND save to database
   useEffect(() => {
     if (player.currentTrack) {
+      // Update in-memory recent tracks for recommendations
       setRecentTracks(prev => {
         const filtered = prev.filter(t => t.videoId !== player.currentTrack?.videoId);
         return [player.currentTrack!, ...filtered].slice(0, 10);
       });
+
+      // Save to listening_history in database
+      if (user) {
+        const saveToHistory = async () => {
+          const track = player.currentTrack!;
+          const trackId = track.id.startsWith('yt:') ? track.id : `yt:${track.videoId}`;
+          
+          try {
+            // First ensure the track exists in the tracks table
+            const { error: upsertError } = await supabase
+              .from('tracks')
+              .upsert({
+                id: trackId,
+                video_id: track.videoId,
+                title: track.title,
+                artists: track.artist ? [track.artist] : [],
+                thumbnail: track.thumbnail,
+                duration: track.duration || 0,
+              }, { onConflict: 'id' });
+
+            if (upsertError) {
+              console.error('Error upserting track:', upsertError);
+            }
+
+            // Then add to listening history
+            const { error: historyError } = await supabase
+              .from('listening_history')
+              .insert({
+                user_id: user.id,
+                track_id: trackId,
+                duration_played: 0,
+              });
+
+            if (historyError) {
+              console.error('Error saving to listening history:', historyError);
+            } else {
+              console.log('Saved to listening history:', track.title);
+            }
+          } catch (error) {
+            console.error('Error saving listening history:', error);
+          }
+        };
+
+        saveToHistory();
+      }
     }
-  }, [player.currentTrack?.videoId]);
+  }, [player.currentTrack?.videoId, user]);
 
   // Smart autoplay when queue ends
   const fetchAutoplayRecommendation = useCallback(async () => {
