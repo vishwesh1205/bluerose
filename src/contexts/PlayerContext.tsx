@@ -263,23 +263,28 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   }, [queue, queueIndex, shuffle, repeat, player]);
 
   const playPreviousTrack = useCallback(() => {
-    if (queue.length === 0) return;
-
     // If more than 3 seconds in, restart current track
     if (player.currentTime > 3) {
       player.seek(0);
       return;
     }
 
-    let prevIndex = queueIndex - 1;
-    if (prevIndex < 0) {
-      if (repeat === "all") {
-        prevIndex = queue.length - 1;
+    // If no queue or at the beginning, restart current song
+    if (queue.length === 0 || queueIndex <= 0) {
+      if (repeat === "all" && queue.length > 0) {
+        // Loop to the last track
+        const lastIndex = queue.length - 1;
+        setQueueIndex(lastIndex);
+        player.loadTrack(queue[lastIndex]);
       } else {
-        prevIndex = 0;
+        // Restart current song
+        player.seek(0);
       }
+      return;
     }
 
+    // Go to previous track
+    const prevIndex = queueIndex - 1;
     setQueueIndex(prevIndex);
     const track = queue[prevIndex];
     if (track) {
