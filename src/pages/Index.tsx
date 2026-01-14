@@ -3,6 +3,7 @@ import AppHeader from "@/components/AppHeader";
 import HeroSection from "@/components/HeroSection";
 import MusicPlayer from "@/components/MusicPlayer";
 import MobileNav from "@/components/MobileNav";
+import MiniPlayer from "@/components/MiniPlayer";
 import TrendingPlaylists from "@/components/TrendingPlaylists";
 
 const Index = () => {
@@ -27,7 +28,8 @@ const Index = () => {
         {/* Music Player */}
         <MusicPlayer />
 
-        {/* Mobile Navigation */}
+        {/* Mobile Mini Player & Navigation */}
+        <MiniPlayer />
         <MobileNav />
       </main>
     </div>
