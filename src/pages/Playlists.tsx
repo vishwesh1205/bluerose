@@ -5,6 +5,7 @@ import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/AppHeader";
 import MusicPlayer from "@/components/MusicPlayer";
 import MobileNav from "@/components/MobileNav";
+import MiniPlayer from "@/components/MiniPlayer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -118,6 +119,7 @@ const PlaylistsContent = () => {
             </Button>
           </div>
           <MusicPlayer />
+          <MiniPlayer />
           <MobileNav />
         </main>
       </div>
@@ -322,6 +324,7 @@ const PlaylistsContent = () => {
         </div>
 
         <MusicPlayer />
+        <MiniPlayer />
         <MobileNav />
       </main>
     </div>

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AddToPlaylist from "@/components/AddToPlaylist";
 import MusicPlayer from "@/components/MusicPlayer";
 import MobileNav from "@/components/MobileNav";
+import MiniPlayer from "@/components/MiniPlayer";
 
 interface ChartSong {
   rank: number;
@@ -336,6 +337,7 @@ const Charts = () => {
 
       {/* Music Player */}
       <MusicPlayer />
+      <MiniPlayer />
       <MobileNav />
     </div>
   );
