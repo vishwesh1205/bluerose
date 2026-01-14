@@ -233,7 +233,13 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       });
     }
     
-    if (queue.length === 0) return;
+    // If no queue, trigger autoplay if enabled
+    if (queue.length === 0) {
+      if (autoplay && !isAutoplayLoading) {
+        fetchAutoplayRecommendation();
+      }
+      return;
+    }
 
     let nextIndex: number;
     
@@ -249,6 +255,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       if (nextIndex >= queue.length) {
         if (repeat === "all") {
           nextIndex = 0;
+        } else if (autoplay && !isAutoplayLoading) {
+          // End of queue, fetch AI recommendation
+          fetchAutoplayRecommendation();
+          return;
         } else {
           return; // End of queue
         }
@@ -260,7 +270,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     if (track) {
       player.loadTrack(track);
     }
-  }, [queue, queueIndex, shuffle, repeat, player]);
+  }, [queue, queueIndex, shuffle, repeat, autoplay, isAutoplayLoading, fetchAutoplayRecommendation, player]);
 
   const playPreviousTrack = useCallback(() => {
     // If more than 3 seconds in, restart current track
