@@ -155,16 +155,17 @@ const NowPlayingContent = () => {
 
         {/* Actions Row */}
         <div className="flex items-center gap-6 mb-8">
-          {isAuthenticated && currentTrackId && (
-            <button
-              onClick={handleLike}
-              className={`transition-colors ${
-                isLiked(currentTrackId) ? "text-accent" : "text-muted-foreground hover:text-accent"
-              }`}
-            >
-              <Heart size={28} className={isLiked(currentTrackId) ? "fill-current" : ""} />
-            </button>
-          )}
+          <button
+            onClick={() => setShowQueue(!showQueue)}
+            className={`transition-colors ${
+              showQueue ? "text-primary" : "text-muted-foreground hover:text-primary"
+            }`}
+          >
+            <ListMusic size={28} />
+            {upcomingTracks.length > 0 && (
+              <span className="sr-only">{upcomingTracks.length} songs in queue</span>
+            )}
+          </button>
           {currentTrackId && <AddToPlaylist trackId={currentTrackId} />}
         </div>
 
