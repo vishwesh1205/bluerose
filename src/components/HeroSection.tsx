@@ -19,7 +19,6 @@ const HeroSection = () => {
   const [recentTracks, setRecentTracks] = useState<RecentTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  const categories = ["For You", "Relax", "Workout", "Focus", "Party", "Travel"];
   const colors = ["bg-primary", "bg-secondary", "bg-accent", "bg-amber-600"];
 
   useEffect(() => {
@@ -88,14 +87,9 @@ const HeroSection = () => {
     });
   };
   return <div className="flex-1 overflow-y-auto px-6 md:px-10 pb-32 custom-scrollbar">
-      {/* Welcome & Categories */}
+      {/* Welcome Tagline */}
       <div className="mb-8 mt-2">
-        <h2 className="text-3xl font-bold mb-6">Good evening</h2>
-        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-          {categories.map((cat, i) => <button key={i} className={`px-6 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${i === 0 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-card text-muted-foreground hover:bg-muted'}`}>
-              {cat}
-            </button>)}
-        </div>
+        <h2 className="text-3xl font-bold mb-6">Hey, I am Jupiter</h2>
       </div>
 
       {/* Featured Album Hero */}
