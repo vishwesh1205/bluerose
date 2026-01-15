@@ -1,4 +1,3 @@
-import { Music2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,17 +13,9 @@ const AppHeader = () => {
     loading
   } = useAuth();
   const userInitial = user?.email?.charAt(0).toUpperCase() || "U";
-  return <header className="h-20 flex items-center justify-between px-6 md:px-10 shrink-0 z-10">
-      {/* Mobile Logo */}
-      <div className="flex items-center gap-2 md:hidden">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <Music2 size={20} className="text-primary-foreground" />
-        </div>
-        <span className="font-bold text-xl">Caffeine</span>
-      </div>
-      
-      {/* Desktop spacer */}
-      <div className="hidden md:block" />
+  return <header className="h-16 flex items-center justify-end px-6 md:px-10 shrink-0 z-10">
+      {/* Spacer */}
+      <div className="flex-1" />
 
       {/* Right side */}
       <div className="flex items-center gap-4">
