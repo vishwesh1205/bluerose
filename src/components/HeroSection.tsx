@@ -86,18 +86,11 @@ const HeroSection = () => {
       duration: track.duration || 0,
     });
   };
-  return <div className="flex-1 overflow-y-auto px-6 md:px-10 pb-32 custom-scrollbar">
+  return <div className="px-6 md:px-10">
       {/* Welcome Tagline */}
-      <div className="mb-8 mt-2">
-        <h2 className="text-3xl font-bold mb-6">Hey, I am Jupiter</h2>
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold">Hey, I am Jupiter</h2>
       </div>
-
-      {/* Featured Album Hero */}
-      <section className="mb-12 relative overflow-hidden rounded-3xl group">
-        
-        
-        
-      </section>
 
       {/* Recently Played Grid */}
       {user && (
