@@ -171,20 +171,24 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         // Search for the first recommendation
         for (const rec of recommendations) {
           try {
-            const searchResponse = await supabase.functions.invoke('youtube-search', {
-              body: { query: rec.query, maxResults: 1 }
+            // Use GET request format with query params
+            const searchUrl = `youtube-search?action=search&q=${encodeURIComponent(rec.query)}&limit=1`;
+            const searchResponse = await supabase.functions.invoke(searchUrl, {
+              method: 'GET'
             });
             
-            const results = searchResponse.data?.items || [];
+            // The youtube-search function returns a flat array of tracks
+            const results = Array.isArray(searchResponse.data) ? searchResponse.data : [];
+            
             if (results.length > 0) {
               const video = results[0];
               const track: Track = {
-                id: video.id.videoId,
-                videoId: video.id.videoId,
-                title: video.snippet.title,
-                artist: video.snippet.channelTitle,
-                thumbnail: video.snippet.thumbnails?.medium?.url || video.snippet.thumbnails?.default?.url,
-                duration: 0,
+                id: video.id || `yt:${video.videoId}`,
+                videoId: video.videoId,
+                title: video.title,
+                artist: video.artists?.[0] || video.channelTitle || "Unknown Artist",
+                thumbnail: video.thumbnail,
+                duration: video.duration || 0,
               };
               
               // Add to queue and play
