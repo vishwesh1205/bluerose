@@ -68,12 +68,13 @@ const industries: Record<string, { title: string; description: string; gradient:
 const Charts = () => {
   const { industry } = useParams<{ industry: string }>();
   const navigate = useNavigate();
-  const { loadTrack, addToQueue, currentTrack, isPlaying } = usePlayer();
+  const { loadTrack, addToQueue, clearQueue, currentTrack, isPlaying, toggleShuffle, shuffle } = usePlayer();
   
   const [chart, setChart] = useState<ChartSong[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+  const [isShuffling, setIsShuffling] = useState(false);
 
   const industryData = industry ? industries[industry.toLowerCase()] : null;
 
@@ -173,6 +174,88 @@ const Charts = () => {
     }
   };
 
+  const shufflePlay = async () => {
+    if (chart.length === 0) return;
+    
+    setIsShuffling(true);
+    
+    // Shuffle the chart array
+    const shuffledChart = [...chart].sort(() => Math.random() - 0.5);
+    
+    // Clear existing queue
+    clearQueue();
+    
+    // Enable shuffle mode in player
+    if (!shuffle) {
+      toggleShuffle();
+    }
+    
+    try {
+      // Play the first shuffled song
+      const firstSong = shuffledChart[0];
+      const searchQuery = `${firstSong.title} ${firstSong.artists.join(' ')} ${industryData?.language} song`;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search?action=search&q=${encodeURIComponent(searchQuery)}&limit=1`
+      );
+
+      if (!response.ok) throw new Error('Search failed');
+
+      const results = await response.json();
+      if (results.length > 0) {
+        const result = results[0];
+        loadTrack({
+          id: result.id,
+          videoId: result.videoId,
+          title: result.title,
+          artist: result.artists?.[0] || result.channelTitle,
+          thumbnail: result.thumbnail,
+          duration: result.duration || 0
+        });
+        
+        toast.success("Shuffle play started!", {
+          description: `Playing ${shuffledChart.length} songs in random order`
+        });
+
+        // Add remaining shuffled songs to queue (limit to 10 for performance)
+        for (let i = 1; i < Math.min(10, shuffledChart.length); i++) {
+          const song = shuffledChart[i];
+          try {
+            const searchQuery = `${song.title} ${song.artists.join(' ')} ${industryData?.language} song`;
+            const response = await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search?action=search&q=${encodeURIComponent(searchQuery)}&limit=1`
+            );
+            
+            if (!response.ok) continue;
+            
+            const results = await response.json();
+            if (results.length > 0) {
+              const result = results[0];
+              addToQueue({
+                id: result.id,
+                videoId: result.videoId,
+                title: result.title,
+                artist: result.artists?.[0] || result.channelTitle,
+                thumbnail: result.thumbnail,
+                duration: result.duration || 0
+              });
+            }
+          } catch (error) {
+            console.error('Error adding shuffled song to queue:', error);
+          }
+        }
+        
+        navigate('/now-playing');
+      } else {
+        toast.error("Couldn't find any songs to shuffle");
+      }
+    } catch (error) {
+      console.error('Error starting shuffle play:', error);
+      toast.error("Failed to start shuffle play");
+    } finally {
+      setIsShuffling(false);
+    }
+  };
+
   if (!industryData) return null;
 
   return (
@@ -226,8 +309,18 @@ const Charts = () => {
             <Play className="w-6 h-6 ml-1" fill="currentColor" />
           )}
         </Button>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-          <Shuffle className="w-5 h-5" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className={`text-muted-foreground hover:text-foreground ${shuffle ? 'text-primary' : ''}`}
+          onClick={shufflePlay}
+          disabled={loading || chart.length === 0 || isShuffling}
+        >
+          {isShuffling ? (
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Shuffle className="w-5 h-5" />
+          )}
         </Button>
       </div>
 
