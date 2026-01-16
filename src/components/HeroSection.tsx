@@ -89,7 +89,7 @@ const HeroSection = () => {
   return <div className="px-6 md:px-10">
       {/* Welcome Tagline */}
       <div className="mb-6">
-        <h2 className="text-3xl font-bold">Hey, I am Jupiter</h2>
+        <h2 className="text-3xl font-bold text-glow">Hey, I am Jupiter</h2>
       </div>
 
       {/* Recently Played Grid */}
