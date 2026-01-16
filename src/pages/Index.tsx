@@ -5,6 +5,7 @@ import MusicPlayer from "@/components/MusicPlayer";
 import MobileNav from "@/components/MobileNav";
 import MiniPlayer from "@/components/MiniPlayer";
 import TrendingPlaylists from "@/components/TrendingPlaylists";
+import JupiterAI from "@/components/JupiterAI";
 
 const Index = () => {
   return (
@@ -22,6 +23,7 @@ const Index = () => {
           <HeroSection />
           <div className="px-6 md:px-10">
             <TrendingPlaylists />
+            <JupiterAI />
           </div>
         </div>
 
