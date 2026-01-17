@@ -145,10 +145,11 @@ const SearchContent = () => {
               <Button
                 onClick={handleSearch}
                 disabled={loading || !searchQuery.trim()}
-                className="px-8 py-6 bg-primary hover:bg-primary/90 rounded-xl font-medium"
+                size="sm"
+                className="px-4 py-2 rounded-full bg-white text-black hover:bg-white/90 font-semibold text-sm"
               >
                 {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   "Search"
                 )}
