@@ -27,39 +27,39 @@ interface TrackResult {
 }
 
 const industries: Record<string, { title: string; description: string; gradient: string; language: string }> = {
-  kollywood: {
+kollywood: {
     title: "Kollywood",
-    description: "Top 50 Tamil Hits",
+    description: "Top 15 Tamil Hits",
     gradient: "from-violet-600 to-purple-500",
     language: "Tamil",
   },
   tollywood: {
     title: "Tollywood",
-    description: "Top 50 Telugu Hits",
+    description: "Top 15 Telugu Hits",
     gradient: "from-pink-600 to-rose-500",
     language: "Telugu",
   },
   bollywood: {
     title: "Bollywood",
-    description: "Top 50 Hindi Hits",
+    description: "Top 15 Hindi Hits",
     gradient: "from-cyan-500 to-teal-500",
     language: "Hindi",
   },
   mollywood: {
     title: "Mollywood",
-    description: "Top 50 Malayalam Hits",
+    description: "Top 15 Malayalam Hits",
     gradient: "from-orange-500 to-amber-500",
     language: "Malayalam",
   },
   hollywood: {
     title: "Hollywood",
-    description: "Top 50 English Hits",
+    description: "Top 15 English Hits",
     gradient: "from-blue-600 to-indigo-500",
     language: "English",
   },
   sandalwood: {
     title: "Sandalwood",
-    description: "Top 50 Kannada Hits",
+    description: "Top 15 Kannada Hits",
     gradient: "from-emerald-500 to-green-500",
     language: "Kannada",
   },
@@ -286,7 +286,7 @@ const Charts = () => {
             <div className="flex flex-col gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-white/70">Playlist</span>
               <h1 className="text-4xl md:text-6xl font-bold text-white font-display">
-                {industryData.title} Top 50
+                {industryData.title} Top 15
               </h1>
               <p className="text-white/70 mt-2">{industryData.description}</p>
               <p className="text-white/50 text-sm">{chart.length} songs • Updated daily</p>
