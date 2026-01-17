@@ -76,11 +76,11 @@ serve(async (req) => {
 
     const language = industryLanguageMap[industry] || industry;
 
-    console.log(`Generating Top 50 chart for ${industry} (${language})`);
+    console.log(`Generating Top 15 chart for ${industry} (${language})`);
 
-    const systemPrompt = `You are an expert music chart curator specializing in ${industry} (${language} language) music.
+const systemPrompt = `You are an expert music chart curator specializing in ${industry} (${language} language) music.
 
-Generate a Top 50 trending songs chart following these strict rules:
+Generate a Top 15 trending songs chart following these strict rules:
 
 SELECTION CRITERIA (in order of priority):
 1. Language must be ${language}
@@ -95,7 +95,7 @@ RANKING RULES:
 - Balance genres: romance, mass/dance, melody, emotional
 
 OUTPUT FORMAT (JSON array):
-Return EXACTLY 50 songs as a JSON array with this structure:
+Return EXACTLY 15 songs as a JSON array with this structure:
 [
   {
     "rank": 1,
@@ -122,7 +122,7 @@ IMPORTANT:
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Generate the current Top 50 trending ${industry} songs chart. Focus on songs that are popular RIGHT NOW in ${language} music. Return only the JSON array.` }
+          { role: "user", content: `Generate the current Top 15 trending ${industry} songs chart. Focus on songs that are popular RIGHT NOW in ${language} music. Return only the JSON array.` }
         ],
       }),
     });
@@ -164,10 +164,10 @@ IMPORTANT:
       );
     }
 
-    // Validate and ensure 50 songs
+// Validate and ensure 15 songs
     const validChart = chart
       .filter((song: any) => song.title && song.artists && song.rank)
-      .slice(0, 50)
+      .slice(0, 15)
       .map((song: any, index: number) => ({
         rank: index + 1,
         title: song.title,

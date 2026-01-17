@@ -1,7 +1,13 @@
-import { Card } from "@/components/ui/card";
-import { Play } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const industries = [
   {
@@ -56,44 +62,56 @@ const TrendingPlaylists = () => {
   };
 
   return (
-    <section className="pb-20 px-4 relative">
+    <section className="pb-12 relative">
       {/* Abstract orbs */}
       <div className="absolute -left-20 top-1/2 w-40 h-40 bg-secondary/10 rounded-full blur-[80px]" />
       <div className="absolute -right-20 top-1/3 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
       
       <div className="container mx-auto relative z-10">
-        <h2 className="text-3xl md:text-4xl font-bold mb-2 font-display">
+        <h2 className="text-2xl md:text-3xl font-bold mb-2 font-display">
           Regional <span className="gradient-text">Playlists</span>
         </h2>
-        <p className="text-muted-foreground mb-8">
-          The songs everyone's playing right now — updated to match your world
+        <p className="text-muted-foreground mb-6 text-sm">
+          The songs everyone's playing right now
         </p>
         
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {industries.map((industry) => (
-            <Card 
-              key={industry.id}
-              className="group relative overflow-hidden glass-effect border-border/30 hover:border-primary/30 transition-all duration-300 cursor-pointer"
-              onClick={() => goToChart(industry)}
-            >
-              <div className="p-5">
-                <div className={`w-full aspect-square rounded-lg bg-gradient-to-br ${industry.gradient} mb-4 flex items-center justify-center relative overflow-hidden`}>
-                  <span className="text-5xl font-bold text-white/90 drop-shadow-lg font-display relative z-10">
-                    {industry.title.charAt(0)}
-                  </span>
-                  <Button 
-                    size="icon"
-                    className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white border-0 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all"
-                  >
-                    <Play className="w-4 h-4 ml-0.5" />
-                  </Button>
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {industries.map((industry) => (
+              <CarouselItem key={industry.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                <div 
+                  className="group relative overflow-hidden rounded-xl glass-effect border border-border/30 hover:border-primary/40 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+                  onClick={() => goToChart(industry)}
+                >
+                  <div className="p-4">
+                    <div className={`w-full aspect-square rounded-lg bg-gradient-to-br ${industry.gradient} mb-3 flex items-center justify-center relative overflow-hidden shadow-lg`}>
+                      <span className="text-4xl md:text-5xl font-bold text-white/90 drop-shadow-lg font-display relative z-10">
+                        {industry.title.charAt(0)}
+                      </span>
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Button 
+                        size="icon"
+                        className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-white text-black hover:bg-white/90 border-0 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all shadow-xl"
+                      >
+                        <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
+                      </Button>
+                    </div>
+                    <h3 className="font-semibold text-sm mb-0.5 text-foreground">{industry.title}</h3>
+                    <p className="text-xs text-muted-foreground">{industry.description}</p>
+                  </div>
                 </div>
-                <h3 className="font-semibold mb-1 text-foreground">{industry.title}</h3>
-                <p className="text-sm text-muted-foreground">{industry.description}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="hidden md:flex -left-4 bg-background/80 border-border/50 hover:bg-background" />
+          <CarouselNext className="hidden md:flex -right-4 bg-background/80 border-border/50 hover:bg-background" />
+        </Carousel>
       </div>
     </section>
   );
