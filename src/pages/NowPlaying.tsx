@@ -188,28 +188,28 @@ const NowPlayingContent = () => {
                 
                 try {
                   const { data, error } = await supabase.functions.invoke('download-track', {
-                    body: null,
-                    headers: {},
+                    body: { 
+                      videoId: currentTrack.videoId,
+                      title: currentTrack.title 
+                    },
                   });
                   
-                  // Build URL with query params
-                  const downloadUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-track?videoId=${currentTrack.videoId}&title=${encodeURIComponent(currentTrack.title)}`;
+                  if (error) {
+                    throw new Error(error.message);
+                  }
                   
-                  const response = await fetch(downloadUrl);
-                  const result = await response.json();
-                  
-                  if (result.status === "success" && result.url) {
+                  if (data?.status === "success" && data?.url) {
                     // Create a hidden link and trigger download
                     const link = document.createElement('a');
-                    link.href = result.url;
-                    link.download = result.filename || `${currentTrack.title}.mp3`;
+                    link.href = data.url;
+                    link.download = data.filename || `${currentTrack.title}.mp3`;
                     link.target = '_blank';
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     toast.success("Download started!");
                   } else {
-                    toast.error(result.error || "Download failed");
+                    toast.error(data?.error || "Download failed");
                   }
                 } catch (error) {
                   console.error("Download error:", error);
