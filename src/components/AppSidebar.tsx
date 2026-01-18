@@ -1,4 +1,4 @@
-import { Home, Compass, Layers, Heart, ListMusic, TrendingUp, Clock, Music2 } from "lucide-react";
+import { Home, Compass, Layers, Heart, ListMusic, TrendingUp, Clock, Music2, Download } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +22,7 @@ const AppSidebar = () => {
       <nav className="space-y-1">
         <NavItem icon={<Home size={20} />} label="Home" active={isActive("/")} onClick={() => navigate("/")} />
         <NavItem icon={<Compass size={20} />} label="Explore" active={isActive("/search")} onClick={() => navigate("/search")} />
+        <NavItem icon={<Download size={20} />} label="Free Music" active={isActive("/free-music")} onClick={() => navigate("/free-music")} />
         <NavItem icon={<Layers size={20} />} label="Library" active={isActive("/playlists")} onClick={() => navigate("/playlists")} />
       </nav>
 
