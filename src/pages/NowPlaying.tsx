@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useLikedTracks } from "@/hooks/useLikedTracks";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Play, 
   Pause, 
@@ -19,7 +20,8 @@ import {
   GripVertical,
   X,
   ChevronUp,
-  Download
+  Download,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,10 +36,12 @@ const formatTime = (seconds: number): string => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
+
 const NowPlayingContent = () => {
   const navigate = useNavigate();
   const [showQueue, setShowQueue] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   const {
     isPlaying,
@@ -177,15 +181,48 @@ const NowPlayingContent = () => {
           )}
           {currentTrack && (
             <button
-              onClick={() => {
-                const downloadUrl = `https://www.y2mate.com/youtube/${currentTrack.videoId}`;
-                window.open(downloadUrl, '_blank');
-                toast.success("Opening download page...");
+              onClick={async () => {
+                if (isDownloading) return;
+                setIsDownloading(true);
+                toast.info("Starting download...");
+                
+                try {
+                  const { data, error } = await supabase.functions.invoke('download-track', {
+                    body: null,
+                    headers: {},
+                  });
+                  
+                  // Build URL with query params
+                  const downloadUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-track?videoId=${currentTrack.videoId}&title=${encodeURIComponent(currentTrack.title)}`;
+                  
+                  const response = await fetch(downloadUrl);
+                  const result = await response.json();
+                  
+                  if (result.status === "success" && result.url) {
+                    // Create a hidden link and trigger download
+                    const link = document.createElement('a');
+                    link.href = result.url;
+                    link.download = result.filename || `${currentTrack.title}.mp3`;
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    toast.success("Download started!");
+                  } else {
+                    toast.error(result.error || "Download failed");
+                  }
+                } catch (error) {
+                  console.error("Download error:", error);
+                  toast.error("Failed to download. Please try again.");
+                } finally {
+                  setIsDownloading(false);
+                }
               }}
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className={`transition-colors ${isDownloading ? 'text-primary animate-pulse' : 'text-muted-foreground hover:text-primary'}`}
               title="Download song"
+              disabled={isDownloading}
             >
-              <Download size={28} />
+              {isDownloading ? <Loader2 size={28} className="animate-spin" /> : <Download size={28} />}
             </button>
           )}
         </div>
