@@ -18,8 +18,10 @@ import {
   ListMusic,
   GripVertical,
   X,
-  ChevronUp
+  ChevronUp,
+  Download
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -166,7 +168,26 @@ const NowPlayingContent = () => {
               <span className="sr-only">{upcomingTracks.length} songs in queue</span>
             )}
           </button>
-          {currentTrackId && <AddToPlaylist trackId={currentTrackId} />}
+          {currentTrackId && (
+            <AddToPlaylist 
+              trackId={currentTrackId} 
+              size="default"
+              className="[&_svg]:w-7 [&_svg]:h-7"
+            />
+          )}
+          {currentTrack && (
+            <button
+              onClick={() => {
+                const downloadUrl = `https://www.y2mate.com/youtube/${currentTrack.videoId}`;
+                window.open(downloadUrl, '_blank');
+                toast.success("Opening download page...");
+              }}
+              className="text-muted-foreground hover:text-primary transition-colors"
+              title="Download song"
+            >
+              <Download size={28} />
+            </button>
+          )}
         </div>
 
         {/* Progress Bar */}
