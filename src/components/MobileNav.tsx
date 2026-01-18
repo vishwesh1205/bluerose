@@ -1,4 +1,4 @@
-import { Home, Compass, Layers, Heart } from "lucide-react";
+import { Home, Compass, Layers, Download } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 const MobileNav = () => {
   const navigate = useNavigate();
@@ -7,8 +7,8 @@ const MobileNav = () => {
   return <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/90 backdrop-blur-lg border-t border-border flex justify-around items-center z-50">
       <MobileNavItem icon={<Home size={22} />} active={isActive("/")} onClick={() => navigate("/")} />
       <MobileNavItem icon={<Compass size={22} />} active={isActive("/search")} onClick={() => navigate("/search")} />
+      <MobileNavItem icon={<Download size={22} />} active={isActive("/free-music")} onClick={() => navigate("/free-music")} />
       <MobileNavItem icon={<Layers size={22} />} active={isActive("/playlists")} onClick={() => navigate("/playlists")} />
-      
     </div>;
 };
 interface MobileNavItemProps {
