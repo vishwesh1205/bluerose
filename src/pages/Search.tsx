@@ -16,42 +16,35 @@ import MiniPlayer from "@/components/MiniPlayer";
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedValue(value), delay);
     return () => clearTimeout(handler);
   }, [value, delay]);
-
   return debouncedValue;
 }
-
 const SearchContent = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 300);
-  const { results, loading, search, clearResults } = useYouTubeSearch();
-  const { loadTrack } = usePlayer();
-  const { isLiked } = useLikedTracks();
+  const {
+    results,
+    loading,
+    search,
+    clearResults
+  } = useYouTubeSearch();
+  const {
+    loadTrack
+  } = usePlayer();
+  const {
+    isLiked
+  } = useLikedTracks();
   const lastSearchedRef = useRef("");
-
   const isYouTubeUrl = (text: string) => {
-    const youtubePatterns = [
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-      /^([a-zA-Z0-9_-]{11})$/
-    ];
+    const youtubePatterns = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/, /^([a-zA-Z0-9_-]{11})$/];
     return youtubePatterns.some(pattern => pattern.test(text.trim()));
   };
-
   const extractVideoId = (text: string): string | null => {
-    const patterns = [
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-      /^([a-zA-Z0-9_-]{11})$/
-    ];
-    
+    const patterns = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/, /^([a-zA-Z0-9_-]{11})$/];
     for (const pattern of patterns) {
       const match = text.trim().match(pattern);
       if (match) return match[1];
@@ -67,10 +60,8 @@ const SearchContent = () => {
       search(trimmed);
     }
   }, [debouncedQuery, search]);
-
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return;
-
     if (isYouTubeUrl(searchQuery)) {
       const videoId = extractVideoId(searchQuery);
       if (videoId) {
@@ -80,7 +71,7 @@ const SearchContent = () => {
           title: "Loading...",
           artist: "Unknown Artist",
           thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-          duration: 0,
+          duration: 0
         };
         loadTrack(track);
         navigate("/now-playing");
@@ -91,13 +82,11 @@ const SearchContent = () => {
       await search(searchQuery);
     }
   }, [searchQuery, search, loadTrack, navigate]);
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSearch();
     }
   };
-
   const handlePlayTrack = useCallback((track: SearchTrack) => {
     const playerTrack = {
       id: track.id,
@@ -105,15 +94,13 @@ const SearchContent = () => {
       title: track.title,
       artist: track.artists.join(", "),
       thumbnail: track.thumbnail,
-      duration: track.duration,
+      duration: track.duration
     };
     console.log("Playing track:", playerTrack);
     loadTrack(playerTrack);
     navigate("/now-playing");
   }, [loadTrack, navigate]);
-
-  return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+  return <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <AppSidebar />
       
       <main className="flex-1 flex flex-col overflow-hidden relative">
@@ -130,64 +117,23 @@ const SearchContent = () => {
 
           {/* Search Bar */}
           <div className="relative mb-8">
-            <div className="flex gap-3">
-              <div className="relative flex-1">
-                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search songs, artists, or paste YouTube URL..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="w-full pl-12 pr-4 py-6 text-lg bg-card border-border rounded-xl focus:border-primary focus:ring-primary/20"
-                />
-              </div>
-              <Button
-                onClick={handleSearch}
-                disabled={loading || !searchQuery.trim()}
-                size="icon"
-                className="w-10 h-10 rounded-full bg-white text-black hover:bg-white/90"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <SearchIcon className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
+            
           </div>
 
           {/* Results */}
-          {results.length > 0 && (
-            <div className="space-y-4">
+          {results.length > 0 && <div className="space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold">Results</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearResults}
-                  className="text-muted-foreground hover:text-foreground"
-                >
+                <Button variant="ghost" size="sm" onClick={clearResults} className="text-muted-foreground hover:text-foreground">
                   Clear
                 </Button>
               </div>
               
               <div className="space-y-2">
-                {results.map((track) => (
-                  <div
-                    key={track.id}
-                    className="group flex items-center gap-4 p-3 rounded-xl bg-card/50 hover:bg-card border border-border/30 hover:border-primary/30 transition-all duration-300"
-                  >
+                {results.map(track => <div key={track.id} className="group flex items-center gap-4 p-3 rounded-xl bg-card/50 hover:bg-card border border-border/30 hover:border-primary/30 transition-all duration-300">
                     <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        src={track.thumbnail}
-                        alt={track.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        onClick={() => handlePlayTrack(track)}
-                        className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                      >
+                      <img src={track.thumbnail} alt={track.title} className="w-full h-full object-cover" />
+                      <button onClick={() => handlePlayTrack(track)} className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                         <Play className="w-6 h-6 text-foreground fill-foreground" />
                       </button>
                     </div>
@@ -203,23 +149,16 @@ const SearchContent = () => {
 
                     <div className="flex items-center gap-2">
                       <AddToPlaylist trackId={track.id} />
-                      <Button
-                        onClick={() => handlePlayTrack(track)}
-                        size="sm"
-                        className="bg-primary/20 hover:bg-primary/30 text-primary"
-                      >
+                      <Button onClick={() => handlePlayTrack(track)} size="sm" className="bg-primary/20 hover:bg-primary/30 text-primary">
                         <Play className="w-4 h-4" />
                       </Button>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Empty State */}
-          {results.length === 0 && !loading && (
-            <div className="text-center py-16">
+          {results.length === 0 && !loading && <div className="text-center py-16">
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
                 <SearchIcon className="w-10 h-10 text-muted-foreground" />
               </div>
@@ -229,16 +168,13 @@ const SearchContent = () => {
               <p className="text-muted-foreground/70">
                 Search for songs, artists, or paste a YouTube URL to play
               </p>
-            </div>
-          )}
+            </div>}
         </div>
 
         <MusicPlayer />
         <MiniPlayer />
         <MobileNav />
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default SearchContent;
